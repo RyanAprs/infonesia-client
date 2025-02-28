@@ -1,8 +1,16 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoginUser from "./pages/auth/LoginUser";
+import ArticleList from "./pages/public/ArticleList";
+
 function App() {
   return (
-    <div className="h-screen w-full flex justify-center items-center text-4xl font-bold text-blue-500">
-      Hello World
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<ArticleList />} />
+        
+        <Route path="/login" element={<LoginUser />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
