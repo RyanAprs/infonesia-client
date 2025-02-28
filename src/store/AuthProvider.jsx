@@ -1,3 +1,4 @@
+import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -14,20 +15,23 @@ const UseAuthManager = create(
         set({ loading: true, error: null });
 
         try {
-          const response = await fetch("http://localhost:5000/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
+          const response = await axios.post(
+            "http://localhost:5000/api/auth/login",
+            {
+              email,
+              password,
+            },
+            {
+              headers: { "Content-Type": "application/json" },
+            }
+          );
 
-          const data = await response.json();
+          const data = response.data.data;
 
-          if (!response.ok) {
-            throw new Error(data.message || "Login failed");
-          }
+          console.log(data);
 
           set({
-            token: data.data.token,
+            token: data.token,
             isAuthenticated: true,
             loading: false,
           });
@@ -48,25 +52,16 @@ const UseAuthManager = create(
         set({ loading: true, error: null });
 
         try {
-          const response = await fetch("https://your-api.com/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userData),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(data.message || "Registration failed");
-          }
-
+          await axios.post(
+            "http://localhost:5000/api/auth/register",
+            userData,
+            {
+              headers: { "Content-Type": "application/json" },
+            }
+          );
           set({
-            token: data.token,
-            isAuthenticated: true,
             loading: false,
           });
-
-          return data;
         } catch (error) {
           set({
             error: error.message,

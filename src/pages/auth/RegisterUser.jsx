@@ -4,20 +4,26 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 
-const LoginUser = () => {
+const RegisterUser = () => {
   const navigate = useNavigate();
-  const { login, loading } = UseAuthManager();
+  const { register, loading } = UseAuthManager();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     try {
-      await login(email, password);
-      navigate("/");
+      const data = {
+        email,
+        password,
+        fullName: name,
+      };
+      await register(data);
+      navigate("/login");
     } catch (err) {
-      console.error("Login failed:", err);
+      console.error("Register failed:", err);
     }
   };
 
@@ -26,10 +32,21 @@ const LoginUser = () => {
       <div className="min-h-screen w-full flex justify-center items-center md:p-8 p-8">
         <div className="flex justify-center items-center w-full md:w-1/2 flex-col gap-4">
           <div className="flex justify-center items-center flex-col w-full">
-            <h1 className="text-3xl font-semibold">Masuk </h1>
+            <h1 className="text-3xl font-semibold">Register </h1>
           </div>
 
           <div className="flex flex-col gap-4 w-full">
+            <label htmlFor="" className="-mb-3">
+              Name:
+            </label>
+            <input
+              type="text"
+              placeholder="Name"
+              className="p-input text-lg p-3 rounded border-2"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+
             <label htmlFor="" className="-mb-3">
               Email:
             </label>
@@ -53,7 +70,7 @@ const LoginUser = () => {
             />
             <div className="flex flex-col w-full gap-3">
               <Button
-                onClick={handleLogin}
+                onClick={handleRegister}
                 className="bg-blue-300 text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-4 w-full flex justify-center rounded hover:mainGreen transition-all"
                 disabled={loading}
               >
@@ -65,14 +82,14 @@ const LoginUser = () => {
                     color="white"
                   />
                 ) : (
-                  <p>Masuk</p>
+                  <p className="font-semibold">Register</p>
                 )}
               </Button>
               <div className="flex flex-col gap-1">
                 <div className="flex w-full gap-1 items-center justify-center">
-                  Belum punya akun?
-                  <Link to="/register" className="text-blue-500 underline">
-                    daftar
+                  Sudah punya akun?
+                  <Link to="/login" className="text-blue-500 underline">
+                    masuk
                   </Link>
                 </div>
               </div>
@@ -84,4 +101,4 @@ const LoginUser = () => {
   );
 };
 
-export default LoginUser;
+export default RegisterUser;
