@@ -28,8 +28,6 @@ const UseAuthManager = create(
 
           const data = response.data.data;
 
-          console.log(data);
-
           set({
             token: data.token,
             isAuthenticated: true,
