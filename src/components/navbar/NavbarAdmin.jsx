@@ -10,16 +10,21 @@ import {
   GitPullRequestClosed,
   Newspaper,
   UserPen,
+  CircleUser,
+  LockKeyhole,
+  DoorOpen,
 } from "lucide-react";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Menu as Menuk } from "primereact/menu";
+import { Menu as MenuModal } from "primereact/menu";
 // import icon from "../../assets/prbcare.png";
 // import { ThemeSwitcher } from "../themeSwitcher/ThemeSwitcher";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import UseAuthManager from "../../store/AuthProvider";
+import DropDown from "./DropDown";
 // import { superAdminChangePasswordSchema } from "../../validations/SuperAdminSchema";
 // import { ZodError } from "zod";
 // import {
@@ -44,13 +49,13 @@ import { Toast } from "primereact/toast";
 // } from "../../utils/HandleUnauthorized";
 // import { apotekUpdateCurrentSchema } from "../../validations/ApotekSchema";
 // import { puskesmasUpdateCurrentSchema } from "../../validations/PuskesmasSchema";
-// import { AddressContext } from "../../config/context/AdressContext";
 // import { useModalUpdate } from "../../config/context/ModalUpdateContext";
 // import WaktuOperasional from "../waktuOperasional/WaktuOperasional";
 // import ModalLoading from "/src/components/modalLoading/ModalLoading.jsx";
 // import { Password } from "primereact/password";
 
 const NavbarAdmin = ({ children }) => {
+  const { logout } = UseAuthManager();
   const [beforeModalLoading, setBeforeModalLoading] = useState(false);
   //   const darkMode = useDarkMode(false, { classNameDark: "dark" });
   const [visibleLogout, setVisibleLogout] = useState(false);
@@ -66,36 +71,15 @@ const NavbarAdmin = ({ children }) => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
-  const [isApotekUpdate, setIsApotekUpdate] = useState(false);
-  const [dataApotek, setDataApotek] = useState({
-    namaApotek: "",
-    telepon: "",
-    alamat: "",
-    waktuOperasional: "",
+  const [dataProfile, setDataProfile] = useState({
+    fullName: "",
+    email: "",
   });
-  const [dataPuskesmas, setDataPuskesmas] = useState({
-    namaPuskesmas: "",
-    telepon: "",
-    alamat: "",
-    waktuOperasional: "",
+  const [detailProfile, setDetailProfile] = useState({
+    fullName: "",
+    email: "",
   });
 
-  const [detailDataPuskesmas, setDetailDataPuskesmas] = useState({
-    namaPuskesmas: "",
-    telepon: "",
-    alamat: "",
-    waktuOperasional: "",
-  });
-  const [detailDataApotek, setDetailDataApotek] = useState({
-    namaPuskesmas: "",
-    telepon: "",
-    alamat: "",
-    waktuOperasional: "",
-  });
-
-  const [prevAddress, setPrevAddress] = useState({});
-  const [waktuOperasionalList, setWaktuOperasionalList] = useState([]);
-  const [prevWaktuOperasional, setPrevWaktuOperasional] = useState({});
   const [expanded, setExpanded] = useState(false);
   const [toggle, setToggle] = useState(false);
   const scrollRef = useRef(null);
@@ -111,62 +95,42 @@ const NavbarAdmin = ({ children }) => {
   };
 
   const handleLogout = () => {
-    // dispatch({ type: "LOGOUT" });
+    logout();
     navigate("/admin/login");
   };
 
   //menu
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [key, setKey] = useState(0);
-  //   const itemsNotAdmin = [
-  //     {
-  //       label: (
-  //         <div className="flex justify-center items-center mx-auto gap-2 ">
-  //           <CircleUser />
-  //           <h1>Detail Profile</h1>
-  //         </div>
-  //       ),
-  //       command: () => handleDetailProfileModal(),
-  //     },
-  //     {
-  //       label: (
-  //         <div className="flex justify-center items-center gap-2">
-  //           <LockKeyhole />
-  //           <h1>Ganti Password</h1>
-  //         </div>
-  //       ),
-  //       command: () => handleModalChangePassword(),
-  //     },
-  //     {
-  //       label: (
-  //         <div className="flex justify-center items-center gap-2">
-  //           <DoorOpen />
-  //           <h1>Keluar</h1>
-  //         </div>
-  //       ),
-  //       command: () => handleModalLogout(),
-  //     },
-  //   ];
-  //   const itemsAdmin = [
-  //     {
-  //       label: (
-  //         <div className="flex justify-center items-center gap-2">
-  //           <LockKeyhole />
-  //           <h1>Ganti Password</h1>
-  //         </div>
-  //       ),
-  //       command: () => handleModalChangePassword(),
-  //     },
-  //     {
-  //       label: (
-  //         <div className="flex justify-center items-center gap-2">
-  //           <DoorOpen />
-  //           <h1>Keluar</h1>
-  //         </div>
-  //       ),
-  //       command: () => handleModalLogout(),
-  //     },
-  //   ];
+  const items = [
+    {
+      label: (
+        <div className="flex justify-center items-center mx-auto gap-2 ">
+          <CircleUser />
+          <h1>Detail Profile</h1>
+        </div>
+      ),
+      command: () => handleDetailProfileModal(),
+    },
+    {
+      label: (
+        <div className="flex justify-center items-center gap-2">
+          <LockKeyhole />
+          <h1>Ganti Password</h1>
+        </div>
+      ),
+      command: () => handleModalChangePassword(),
+    },
+    {
+      label: (
+        <div className="flex justify-center items-center gap-2">
+          <DoorOpen />
+          <h1>Keluar</h1>
+        </div>
+      ),
+      command: () => handleModalLogout(),
+    },
+  ];
 
   const handleModalLogout = () => {
     setIsMenuVisible(false);
@@ -183,103 +147,45 @@ const NavbarAdmin = ({ children }) => {
     });
   };
 
-  //   const handleDetailProfileModal = async () => {
-  //     setBeforeModalLoading(true);
-  //     setErrors({});
-  //     setIsMenuVisible(false);
-
-  //     if (role === "nakes") {
-  //       setIsApotekUpdate(false);
-  //       setDetailDataPuskesmas({});
-  //       try {
-  //         const dataResponse = await getCurrentAdminPuskesmas();
-  //         if (dataResponse) {
-  //           setDetailDataPuskesmas({
-  //             namaPuskesmas: dataResponse.namaPuskesmas,
-  //             alamat: dataResponse.alamat,
-  //             telepon: dataResponse.telepon,
-  //             waktuOperasional: dataResponse.waktuOperasional,
-  //           });
-  //         }
-  //         setVisibleDetailProfile(true);
-  //       } catch (error) {
-  //         setVisibleDetailProfile(false);
-  //         HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
-  //         handleApiError(error, toast);
-  //       }
-  //     }
-  //     if (role === "apoteker") {
-  //       setIsApotekUpdate(true);
-  //       setDetailDataApotek({});
-  //       try {
-  //         const dataResponse = await getCurrentAdminApotek();
-  //         if (dataResponse) {
-  //           setDetailDataApotek({
-  //             namaApotek: dataResponse.namaApotek,
-  //             alamat: dataResponse.alamat,
-  //             telepon: dataResponse.telepon,
-  //             waktuOperasional: dataResponse.waktuOperasional,
-  //           });
-  //           setVisibleDetailProfile(true);
-  //         }
-  //       } catch (error) {
-  //         HandleUnauthorizedAdminApotek(error.response, dispatch, navigate);
-  //         handleApiError(error, toast);
-  //       }
-  //     }
-  //     setBeforeModalLoading(false);
-  //   };
+  const handleDetailProfileModal = async () => {
+    // setDetailProfile({});
+    // try {
+    //   const dataResponse = await getCurrentAdminPuskesmas();
+    //   if (dataResponse) {
+    //     setDetailProfile({
+    //       fullName: dataResponse.fullName,
+    //       email: dataResponse.alamat,
+    //     });
+    //   }
+    //   setVisibleDetailProfile(true);
+    // } catch (error) {
+    //   setVisibleDetailProfile(false);
+    //   HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
+    //   handleApiError(error, toast);
+    // }
+  };
 
   //   const { setIsUpdated } = useModalUpdate();
 
-  //   const handleUpdateProfileModal = async () => {
-  //     setBeforeModalLoading(true);
-  //     setVisibleDetailProfile(false);
-  //     setErrors({});
-  //     if (role === "nakes") {
-  //       setIsApotekUpdate(false);
-  //       try {
-  //         const dataResponse = await getCurrentAdminPuskesmas();
-  //         setPrevAddress(dataResponse.alamat);
-  //         setPrevWaktuOperasional(dataResponse.waktuOperasional);
-  //         if (dataResponse) {
-  //           setDataPuskesmas({
-  //             namaPuskesmas: dataResponse.namaPuskesmas,
-  //             alamat: dataResponse.alamat,
-  //             telepon: dataResponse.telepon,
-  //             waktuOperasional: dataResponse.waktuOperasional,
-  //           });
-  //         }
-  //         setVisibleUpdateProfile(true);
-  //       } catch (error) {
-  //         HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
-  //         handleApiError(error, toast);
-  //       }
-  //     }
+  const handleUpdateProfileModal = async () => {
+    // setBeforeModalLoading(true);
+    // setVisibleDetailProfile(false);
+    // setErrors({});
+    // try {
+    //   const dataResponse = await getCurrentAdminPuskesmas();
+    //   if (dataResponse) {
+    //     setDataProfile({
+    //       fullName: dataResponse.fullName,
+    //       email: dataResponse.email,
+    //     });
+    //   }
+    //   setVisibleUpdateProfile(true);
+    // } catch (error) {
+    // HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
+    // }
 
-  //     if (role === "apoteker") {
-  //       setIsApotekUpdate(true);
-  //       try {
-  //         const dataResponse = await getCurrentAdminApotek();
-  //         setPrevWaktuOperasional(dataResponse.waktuOperasional);
-  //         setPrevAddress(dataResponse.alamat);
-
-  //         if (dataResponse) {
-  //           setDataApotek({
-  //             namaApotek: dataResponse.namaApotek,
-  //             alamat: dataResponse.alamat,
-  //             telepon: dataResponse.telepon,
-  //             waktuOperasional: dataResponse.waktuOperasional,
-  //           });
-  //         }
-  //         setVisibleUpdateProfile(true);
-  //       } catch (error) {
-  //         HandleUnauthorizedAdminApotek(error.response, dispatch, navigate);
-  //         handleApiError(error, toast);
-  //       }
-  //     }
-  //     setBeforeModalLoading(false);
-  //   };
+    setBeforeModalLoading(false);
+  };
   const [showToast, setShowToast] = useState(false);
   const toastLogin = useRef(null);
   useEffect(() => {
@@ -301,123 +207,90 @@ const NavbarAdmin = ({ children }) => {
     }
   }, [showToast]);
 
-  //   const handleUpdateProfile = async () => {
-  //     const formattedWaktuOperasional = formatWaktuOperasional();
-  //     try {
-  //       setButtonLoading(true);
-  //       if (isApotekUpdate) {
-  //         const updatedDatas = {
-  //           ...dataApotek,
-  //           alamat: dataApotek.alamat || prevAddress,
-  //           waktuOperasional: formattedWaktuOperasional || prevWaktuOperasional,
-  //         };
-  //         apotekUpdateCurrentSchema.parse(updatedDatas);
+  const handleUpdateProfile = async () => {
+    //   try {
+    //     const updatedDatas = {
+    //       ...dataProfile,
+    //       fullName: dataProfile.fullName,
+    //       email: dataProfile.email,
+    //     };
+    //     puskesmasUpdateCurrentSchema.parse(updatedDatas);
+    //     const response = await updateCurrentPuskesmas(updatedDatas);
+    //     if (response.status === 200) {
+    //       toast.current.show({
+    //         severity: "success",
+    //         summary: "Berhasil",
+    //         detail: "Data Anda diperbarui",
+    //         life: 3000,
+    //       });
+    //       setButtonLoading(false);
+    //       setIsUpdated(true);
+    //       setVisibleUpdateProfile(false);
+    //     }
+    //   } catch (error) {
+    //     setButtonLoading(false);
+    //     if (error instanceof ZodError) {
+    //       const newErrors = {};
+    //       error.errors.forEach((e) => {
+    //         newErrors[e.path[0]] = e.message;
+    //       });
+    //       setErrors(newErrors);
+    //     } else if (error.response && error.response.status === 409) {
+    //       handleApiError(error, toast);
+    //     } else {
+    //       if (isApotekUpdate) {
+    //         HandleUnauthorizedAdminApotek(error.response, dispatch, navigate);
+    //       } else {
+    //         HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
+    //       }
+    //       handleApiError(error, toast);
+    //       setVisibleUpdateProfile(false);
+    //     }
+    //   }
+  };
 
-  //         const response = await updateCurrentApotek(updatedDatas);
-  //         if (response.status === 200) {
-  //           toast.current.show({
-  //             severity: "success",
-  //             summary: "Berhasil",
-  //             detail: "Data Anda diperbarui",
-  //             life: 3000,
-  //           });
-  //           setButtonLoading(false);
-  //           setIsUpdated(true);
-  //           setVisibleUpdateProfile(false);
-  //         }
-  //       } else {
-  //         const updatedDatas = {
-  //           ...dataPuskesmas,
-  //           alamat: dataPuskesmas.alamat || prevAddress,
-  //           waktuOperasional: formattedWaktuOperasional || prevWaktuOperasional,
-  //         };
-  //         puskesmasUpdateCurrentSchema.parse(updatedDatas);
+  const handleModalChangePassword = () => {
+    setDataPassword({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setErrors({});
+    setIsMenuVisible(false);
+    setVisibleChangePassword(true);
+  };
 
-  //         const response = await updateCurrentPuskesmas(updatedDatas);
-  //         if (response.status === 200) {
-  //           toast.current.show({
-  //             severity: "success",
-  //             summary: "Berhasil",
-  //             detail: "Data Anda diperbarui",
-  //             life: 3000,
-  //           });
-  //           setButtonLoading(false);
-  //           setIsUpdated(true);
-  //           setVisibleUpdateProfile(false);
-  //         }
-  //       }
-  //     } catch (error) {
-  //       setButtonLoading(false);
-  //       if (error instanceof ZodError) {
-  //         const newErrors = {};
-  //         error.errors.forEach((e) => {
-  //           newErrors[e.path[0]] = e.message;
-  //         });
-  //         setErrors(newErrors);
-  //       } else if (error.response && error.response.status === 409) {
-  //         handleApiError(error, toast);
-  //       } else {
-  //         if (isApotekUpdate) {
-  //           HandleUnauthorizedAdminApotek(error.response, dispatch, navigate);
-  //         } else {
-  //           HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
-  //         }
-  //         handleApiError(error, toast);
-  //         setVisibleUpdateProfile(false);
-  //       }
-  //     }
-  //   };
-
-  //   const handleModalChangePassword = () => {
-  //     setDataPassword({
-  //       currentPassword: "",
-  //       newPassword: "",
-  //       confirmPassword: "",
-  //     });
-  //     setErrors({});
-  //     setIsMenuVisible(false);
-  //     setVisibleChangePassword(true);
-  //   };
-
-  //   const handleChangePassword = async () => {
-  //     try {
-  //       setButtonLoading(true);
-  //       superAdminChangePasswordSchema.parse(dataPassword);
-  //       let response;
-  //       if (role === "admin") {
-  //         response = await updatePassword(dataPassword);
-  //       } else if (role === "nakes") {
-  //         response = await updatePasswordPuskesmas(dataPassword);
-  //       } else if (role === "apoteker") {
-  //         response = await updatePasswordApotek(dataPassword);
-  //       }
-
-  //       if (response && response.status === 200) {
-  //         toast.current.show({
-  //           severity: "success",
-  //           summary: "Berhasil",
-  //           detail: "Password Anda diperbarui",
-  //           life: 3000,
-  //         });
-  //         setVisibleChangePassword(false);
-  //         setButtonLoading(false);
-  //       }
-  //     } catch (error) {
-  //       setButtonLoading(false);
-  //       if (error instanceof ZodError) {
-  //         const newErrors = {};
-  //         error.errors.forEach((e) => {
-  //           newErrors[e.path[0]] = e.message;
-  //         });
-  //         setErrors(newErrors);
-  //       } else if (error.response && error.response.status === 401) {
-  //         handleChangePasswordError(error, toast);
-  //       } else {
-  //         setVisibleChangePassword(false);
-  //         handleChangePasswordError(error, toast);
-  //       }
-  //     }
-  //   };
+  const handleChangePassword = async () => {
+    // try {
+    //   setButtonLoading(true);
+    //   superAdminChangePasswordSchema.parse(dataPassword);
+    //   response = await updatePassword(dataPassword);
+    //   if (response && response.status === 200) {
+    //     toast.current.show({
+    //       severity: "success",
+    //       summary: "Berhasil",
+    //       detail: "Password Anda diperbarui",
+    //       life: 3000,
+    //     });
+    //     setVisibleChangePassword(false);
+    //     setButtonLoading(false);
+    //   }
+    // } catch (error) {
+    //   setButtonLoading(false);
+    //   if (error instanceof ZodError) {
+    //     const newErrors = {};
+    //     error.errors.forEach((e) => {
+    //       newErrors[e.path[0]] = e.message;
+    //     });
+    //     setErrors(newErrors);
+    //   } else if (error.response && error.response.status === 401) {
+    //     handleChangePasswordError(error, toast);
+    //   } else {
+    //     setVisibleChangePassword(false);
+    //     handleChangePasswordError(error, toast);
+    //   }
+    // }
+  };
 
   const [isButtonLoading, setButtonLoading] = useState(null);
   const menuContainerRef = useRef(null);
@@ -447,10 +320,7 @@ const NavbarAdmin = ({ children }) => {
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
       />
-      <Toast
-        ref={toastLogin}
-        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
-      />
+
       <Sidebar
         className="md:w-1/4 md:block  text-white border-r-white bg-blue-400"
         backgroundColor={``}
@@ -458,7 +328,6 @@ const NavbarAdmin = ({ children }) => {
         breakPoint={"md"}
         toggled={toggle}
         onBackdropClick={handleSidebarToggle}
-        // image={`${img}`}
       >
         <Menu
           menuItemStyles={{
@@ -620,7 +489,7 @@ const NavbarAdmin = ({ children }) => {
             </h1>
           </div>
           <div className="flex justify-between items-center ">
-            <div>{/* <ThemeSwitcher /> */}</div>
+            <div>{/* <ThemeSwitcher /> */}theme</div>
             <Button
               ref={buttonRef}
               severity="secondary"
@@ -643,15 +512,16 @@ const NavbarAdmin = ({ children }) => {
             ></Button>
           </div>
 
-          <div ref={menuContainerRef}>
-            <Menuk
+          {/* <div ref={menuContainerRef}>
+            <MenuModal
               key={key}
               className={` ${
                 isMenuVisible ? "visible" : "hidden"
-              } dark:bg-blackHover shadow-md absolute top-[80px] right-0 `}
-              //   model={role === "admin" ? itemsAdmin : itemsNotAdmin}
-            ></Menuk>
-          </div>
+              } bg-vlue-300 shadow-md absolute top-[80px] right-0 p-4 flex`}
+              model={items}
+            ></MenuModal>
+          </div> */}
+          <DropDown />
         </div>
 
         <div
@@ -663,8 +533,8 @@ const NavbarAdmin = ({ children }) => {
       </div>
 
       {/* Modal Detail Profile */}
-      {/* <Dialog
-        header={isApotekUpdate ? "Profile Apotek" : "Profile Puskesmas"}
+      <Dialog
+        header={"Profile"}
         visible={visibleDetailProfile}
         maximizable
         className="md:w-1/2 w-full"
@@ -676,54 +546,26 @@ const NavbarAdmin = ({ children }) => {
       >
         <div className="flex flex-col p-4 gap-4">
           <label htmlFor="" className="-mb-3">
-            {isApotekUpdate ? "Nama Apotek" : "Nama Puskesmas"}:
+            Nama:
           </label>
           <InputText
             type="text"
             variant="filled"
             disabled
             className="p-input text-lg p-3 rounded"
-            value={
-              isApotekUpdate
-                ? detailDataApotek.namaApotek
-                : detailDataPuskesmas.namaPuskesmas
-            }
+            value={detailProfile.fullName}
           />
 
           <label htmlFor="" className="-mb-3">
-            Telepon:
+            Email:
           </label>
           <InputText
-            type="text"
+            type="email"
             variant="filled"
             disabled
             className="p-input text-lg p-3 rounded"
-            value={
-              isApotekUpdate
-                ? detailDataApotek.telepon
-                : detailDataPuskesmas.telepon
-            }
+            value={detailProfile.email}
           />
-
-          <label htmlFor="" className="-mb-3">
-            Alamat:
-          </label>
-          <div className="text-lg p-3 rounded bg-[#fbfbfc] dark:bg-[#282828] text-[#989da0] dark:text-[#6e6e6e] border dark:border-none min-h-14">
-            <p className="text-[#989da0] dark:text-[#6e6e6e]">
-              {isApotekUpdate
-                ? detailDataApotek.alamat
-                : detailDataPuskesmas.alamat}
-            </p>
-          </div>
-
-          <label htmlFor="" className="-mb-3">
-            Waktu Operasional:
-          </label>
-          <div className="text-lg p-3 rounded bg-[#fbfbfc] dark:bg-[#282828] text-[#989da0] dark:text-[#6e6e6e] border dark:border-none min-h-14">
-            {isApotekUpdate
-              ? validasiWaktuOperasional(detailDataApotek.waktuOperasional)
-              : validasiWaktuOperasional(detailDataPuskesmas.waktuOperasional)}
-          </div>
 
           <Button
             label="Edit Profile"
@@ -731,13 +573,11 @@ const NavbarAdmin = ({ children }) => {
             onClick={handleUpdateProfileModal}
           />
         </div>
-      </Dialog> */}
+      </Dialog>
 
       {/* Modal Update Profile */}
-      {/* <Dialog
-        header={
-          isApotekUpdate ? "Edit Profile Apotek" : "Edit Profile Puskesmas"
-        }
+      <Dialog
+        header="Update Profile"
         visible={visibleUpdateProfile}
         maximizable
         className="md:w-1/2 w-full"
@@ -749,80 +589,43 @@ const NavbarAdmin = ({ children }) => {
       >
         <div className="flex flex-col p-4 gap-4">
           <label htmlFor="" className="-mb-3">
-            {isApotekUpdate ? "Nama Apotek" : "Nama Puskesmas"}:
+            Name
           </label>
           <InputText
             type="text"
-            placeholder={isApotekUpdate ? "Nama Apotek" : "Nama Puskesmas"}
+            placeholder="Name"
             className="p-input text-lg p-3 rounded"
-            value={
-              isApotekUpdate
-                ? dataApotek.namaApotek
-                : dataPuskesmas.namaPuskesmas
-            }
+            value={dataProfile.fullName}
             onChange={(e) =>
-              isApotekUpdate
-                ? setDataApotek((prev) => ({
-                    ...prev,
-                    namaApotek: e.target.value,
-                  }))
-                : setDataPuskesmas((prev) => ({
-                    ...prev,
-                    namaPuskesmas: e.target.value,
-                  }))
+              setDataProfile((prev) => ({
+                ...prev,
+                fullName: e.target.value,
+              }))
             }
           />
-          {errors.namaApotek && (
-            <small className="p-error -mt-3 text-sm">{errors.namaApotek}</small>
-          )}
+          {/* {errors.name && (
+            <small className="p-error -mt-3 text-sm">{errors.name}</small>
+          )} */}
 
           <label htmlFor="" className="-mb-3">
-            Telepon:
+            Email:
           </label>
           <InputText
-            type="text"
-            placeholder="Telepon"
+            type="email"
+            placeholder="Email"
             className="p-input text-lg p-3 rounded"
-            value={isApotekUpdate ? dataApotek.telepon : dataPuskesmas.telepon}
+            value={dataProfile.fullName}
             onChange={(e) =>
-              isApotekUpdate
-                ? setDataApotek((prev) => ({
-                    ...prev,
-                    telepon: e.target.value,
-                  }))
-                : setDataPuskesmas((prev) => ({
-                    ...prev,
-                    telepon: e.target.value,
-                  }))
+              setDataProfile((prev) => ({
+                ...prev,
+                email: e.target.value,
+              }))
             }
           />
-          {errors.telepon && (
+          {/* {errors.telepon && (
             <small className="p-error -mt-3 text-sm">{errors.telepon}</small>
-          )}
-          <label htmlFor="" className="-mb-3">
-            Alamat:
-          </label>
-          <DynamicAddress prevAddress={prevAddress} />
-          <span className="text-sm -mt-4">
-            *Kosongkan alamat jika tidak ingin diubah
-          </span>
-          {errors.alamat && (
-            <small className="p-error -mt-3 text-sm">{errors.alamat}</small>
-          )}
-          <div className="w-full">
-            <WaktuOperasional
-              setWaktuOperasionalList={setWaktuOperasionalList}
-            />
-          </div>
-          <span className="text-sm -mt-4">
-            *Kosongkan waktu operasional jika tidak ingin diubah
-          </span>
+          )} */}
 
-          {errors.waktuOperasional && (
-            <small className="p-error -mt-3 text-sm">
-              {errors.waktuOperasional}
-            </small>
-          )}
           <Button
             disabled={isButtonLoading}
             className="bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-4 w-full flex justify-center rounded-xl hover:mainGreen transition-all"
@@ -840,10 +643,10 @@ const NavbarAdmin = ({ children }) => {
             )}
           </Button>
         </div>
-      </Dialog> */}
+      </Dialog>
 
       {/* Modal ubah password */}
-      {/* <Dialog
+      <Dialog
         header={"Ubah Password"}
         visible={visibleChangePassword}
         maximizable
@@ -856,14 +659,14 @@ const NavbarAdmin = ({ children }) => {
       >
         <div className="flex flex-col p-4 gap-4">
           <label htmlFor="" className="-mb-3">
-            Password Lama:
+            Current Password:
           </label>
 
-          <Password
-            toggleMask
-            placeholder="Password Lama"
+          <input
+            type="password"
+            placeholder="Current password"
+            className="p-input text-lg p-3 rounded border-2"
             value={dataPassword.currentPassword}
-            feedback={false}
             onChange={(e) =>
               setDataPassword((prev) => ({
                 ...prev,
@@ -872,18 +675,18 @@ const NavbarAdmin = ({ children }) => {
             }
           />
 
-          {errors.currentPassword && (
+          {/* {errors.currentPassword && (
             <small className="p-error -mt-3 text-sm">
               {errors.currentPassword}
             </small>
-          )}
+          )} */}
           <label htmlFor="" className="-mb-3">
-            Password Baru:
+            New Password:
           </label>
-          <Password
-            feedback={false}
-            toggleMask
-            placeholder="Password Baru"
+          <input
+            type="password"
+            placeholder="New password"
+            className="p-input text-lg p-3 rounded border-2"
             value={dataPassword.newPassword}
             onChange={(e) =>
               setDataPassword((prev) => ({
@@ -892,18 +695,18 @@ const NavbarAdmin = ({ children }) => {
               }))
             }
           />
-          {errors.newPassword && (
+          {/* {errors.newPassword && (
             <small className="p-error -mt-3 text-sm">
               {errors.newPassword}
             </small>
-          )}
+          )} */}
           <label htmlFor="" className="-mb-3">
-            Konfirmasi Password:
+            Confirm Password:
           </label>
-          <Password
-            feedback={false}
-            toggleMask
-            placeholder="Konfirmasi Password Baru"
+          <input
+            type="password"
+            placeholder="Confirm password"
+            className="p-input text-lg p-3 rounded border-2"
             value={dataPassword.confirmPassword}
             onChange={(e) =>
               setDataPassword((prev) => ({
@@ -934,10 +737,10 @@ const NavbarAdmin = ({ children }) => {
             )}
           </Button>
         </div>
-      </Dialog> */}
+      </Dialog>
 
       {/* Modal Logout */}
-      {/* <Dialog
+      <Dialog
         header="Logout"
         visible={visibleLogout}
         className="md:w-1/2 w-full "
@@ -963,7 +766,7 @@ const NavbarAdmin = ({ children }) => {
             />
           </div>
         </div>
-      </Dialog> */}
+      </Dialog>
     </div>
   );
 };
