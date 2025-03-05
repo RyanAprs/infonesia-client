@@ -7,6 +7,10 @@ import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import UseAuthManager from "./store/AuthProvider";
 import NavbarAdmin from "./components/navbar/NavbarAdmin";
 import { AdminProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
+import UserData from "./pages/admin/UserData";
+import NewsData from "./pages/admin/NewsData";
+import JournalistData from "./pages/admin/JournalistData";
+import CategoryData from "./pages/admin/CategoryData";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
@@ -14,6 +18,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* PUBLIC */}
         <Route path="/" element={<ArticleList />} />
 
         {/* ADMIN */}
@@ -27,11 +32,51 @@ function App() {
           }
         >
           <Route
-            path="/admin/dashboard"
+            path="/admin/beranda"
             element={
               <>
                 <NavbarAdmin>
                   <DashboardAdmin />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/admin/pengguna"
+            element={
+              <>
+                <NavbarAdmin>
+                  <UserData />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/admin/berita"
+            element={
+              <>
+                <NavbarAdmin>
+                  <NewsData />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/admin/jurnalis"
+            element={
+              <>
+                <NavbarAdmin>
+                  <JournalistData />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/admin/kategori"
+            element={
+              <>
+                <NavbarAdmin>
+                  <CategoryData />
                 </NavbarAdmin>
               </>
             }

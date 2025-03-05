@@ -12,15 +12,18 @@ import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { CustomModal } from "../modal/CustomModal";
 import UseAuthManager from "../../store/AuthProvider";
+import { getRole } from "../ProtectedRoute/ProtectedRoute";
+import { useNavigate } from "react-router-dom";
 
 const DropDown = () => {
-  const { logout } = UseAuthManager();
+  const { logout, token } = UseAuthManager();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isUpdateProfileModalOpen, setIsUpdateProfileModalOpen] =
     useState(false);
   const [isButtonLoading, setButtonLoading] = useState(null);
+  const navigate = useNavigate();
 
   const [dataPassword, setDataPassword] = useState({
     currentPassword: "",
@@ -112,6 +115,19 @@ const DropDown = () => {
     setIsProfileModalOpen(false);
   };
 
+  const handleLogout = () => {
+    const role = getRole(token);
+    logout();
+
+    if (role === "ADMIN") {
+      navigate("/admin/login");
+    } else if (role === "JOURNALIST") {
+      navigate("/jurnalis/login");
+    } else {
+      navigate("/login");
+    }
+  };
+
   const menuSections = [
     {
       items: [
@@ -133,7 +149,7 @@ const DropDown = () => {
         {
           label: "Logout",
           icon: <DoorOpen />,
-          onClick: () => logout(),
+          onClick: () => handleLogout(),
         },
       ],
       activeClassName: "hover:bg-blue-300 hover:text-white",

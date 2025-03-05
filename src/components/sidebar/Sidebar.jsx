@@ -80,14 +80,14 @@ const CustomSidebar = ({ expanded }) => {
             icon={<LayoutGrid />}
             component={
               <Link
-                to="/admin/dashboard"
+                to="/admin/beranda"
                 className={`flex  hover:bg-blue-100  ${
-                  location.pathname === "/admin/dashboard" ? "bg-blue-400" : ""
+                  location.pathname === "/admin/beranda" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
             }
           >
-            Dashboard
+            Beranda
           </MenuItem>
           <MenuItem
             className={`${expanded ? "mb-2" : "mb-3"}`}

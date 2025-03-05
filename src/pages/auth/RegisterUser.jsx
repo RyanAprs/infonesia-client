@@ -71,7 +71,7 @@ const RegisterUser = () => {
             <div className="flex flex-col w-full gap-3">
               <Button
                 onClick={handleRegister}
-                className="bg-blue-300 text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-4 w-full flex justify-center rounded hover:mainGreen transition-all"
+                className="bg-blue-500 text-white hover:bg-blue-400 p-4 w-full flex justify-center rounded transition-all"
                 disabled={loading}
               >
                 {loading ? (
