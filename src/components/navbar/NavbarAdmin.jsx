@@ -73,9 +73,9 @@ const NavbarAdmin = ({ children }) => {
               className="p-1 rounded-full cursor-pointer hidden md:block"
               label={
                 expanded ? (
-                  <ArrowRight strokeWidth={1.5} className=" text-black" />
+                  <ArrowRight className=" text-black" />
                 ) : (
-                  <ArrowLeft strokeWidth={1.5} className=" text-black" />
+                  <ArrowLeft className=" text-black" />
                 )
               }
             ></Button>

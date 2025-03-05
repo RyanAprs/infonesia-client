@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 
-const LoginAdmin = () => {
+const LoginJournalist = () => {
   const navigate = useNavigate();
   const { login, loading } = UseAuthManager();
   const [email, setEmail] = useState("");
@@ -15,7 +15,7 @@ const LoginAdmin = () => {
 
     try {
       await login(email, password);
-      navigate("/admin/beranda");
+      navigate("/jurnalis/beranda");
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -76,4 +76,4 @@ const LoginAdmin = () => {
   );
 };
 
-export default LoginAdmin;
+export default LoginJournalist;

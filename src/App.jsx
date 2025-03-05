@@ -4,13 +4,14 @@ import ArticleList from "./pages/public/ArticleList";
 import RegisterUser from "./pages/auth/RegisterUser";
 import LoginAdmin from "./pages/auth/LoginAdmin";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
-import UseAuthManager from "./store/AuthProvider";
 import NavbarAdmin from "./components/navbar/NavbarAdmin";
 import { AdminProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
 import UserData from "./pages/admin/UserData";
 import NewsData from "./pages/admin/NewsData";
 import JournalistData from "./pages/admin/JournalistData";
 import CategoryData from "./pages/admin/CategoryData";
+import UseAuthManager from "./store/AuthProvider";
+import LoginJournalist from "./pages/auth/LoginJournalist";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
@@ -82,6 +83,9 @@ function App() {
             }
           />
         </Route>
+
+        {/* JOURNALIST */}
+        <Route path="/jurnalis/login" element={<LoginJournalist />} />
 
         {/* USER */}
         <Route path="/login" element={<LoginUser />} />

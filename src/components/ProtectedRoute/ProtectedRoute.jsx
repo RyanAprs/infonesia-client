@@ -26,3 +26,17 @@ export const AdminProtectedRoute = ({
     <Navigate to={redirectTo} replace />
   );
 };
+
+export const JournalistProtectedRoute = ({
+  isAuthenticated,
+  redirectTo = "/",
+  token,
+}) => {
+  const role = getRole(token);
+
+  return isAuthenticated && role === "JOURNALIST" ? (
+    <Outlet />
+  ) : (
+    <Navigate to={redirectTo} replace />
+  );
+};

@@ -2,9 +2,12 @@ import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import {
   AlignJustify,
+  ChevronDown,
   CircleUserRoundIcon,
   DoorOpen,
   LockKeyhole,
+  User,
+  UserCircle,
   X,
 } from "lucide-react";
 import { InputText } from "primereact/inputtext";
@@ -329,49 +332,50 @@ const DropDown = () => {
   return (
     <>
       <Menu as="div" className="relative inline-block text-left ">
-        {({ open }) => (
-          <>
-            <Menu.Button
-              className="flex items-center gap-3"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              <div className="flex items-center gap-1 text-lg text-blue-800">
-                {open ? <X /> : <AlignJustify />}
+        <>
+          <Menu.Button
+            className="flex items-center gap-3"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <div className="flex items-center gap-1 text-lg text-blue-800">
+              <div className="flex justify-center items-center gap-2">
+                <UserCircle size={35} />
+                <ChevronDown />
               </div>
-            </Menu.Button>
+            </div>
+          </Menu.Button>
 
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-150"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
-            >
-              <Menu.Items className="absolute right-0 z-50 mt-3 w-60 origin-top-right divide-y rounded-lg shadow-lg ring-1 bg-blue-400 ring-white">
-                {menuSections.map((section, sectionIndex) => (
-                  <div
-                    key={sectionIndex}
-                    className="py-2 font-medium px-2 rounded"
-                  >
-                    {section.items.map((item, itemIndex) => (
-                      <Menu.Item key={itemIndex}>
-                        <button
-                          onClick={item.onClick}
-                          className={`flex w-full items-center rounded-md gap-1.5 px-4 py-2 text-sm text-white ${section.activeClassName}`}
-                        >
-                          {item.icon}
-                          {item.label}
-                        </button>
-                      </Menu.Item>
-                    ))}
-                  </div>
-                ))}
-              </Menu.Items>
-            </Transition>
-          </>
-        )}
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-200"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-150"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute right-0 z-50 mt-3 w-60 origin-top-right divide-y rounded-lg shadow-lg ring-1 bg-blue-400 ring-white">
+              {menuSections.map((section, sectionIndex) => (
+                <div
+                  key={sectionIndex}
+                  className="py-2 font-medium px-2 rounded"
+                >
+                  {section.items.map((item, itemIndex) => (
+                    <Menu.Item key={itemIndex}>
+                      <button
+                        onClick={item.onClick}
+                        className={`flex w-full items-center rounded-md gap-1.5 px-4 py-2 text-sm text-white ${section.activeClassName}`}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </button>
+                    </Menu.Item>
+                  ))}
+                </div>
+              ))}
+            </Menu.Items>
+          </Transition>
+        </>
       </Menu>
 
       <CustomModal
