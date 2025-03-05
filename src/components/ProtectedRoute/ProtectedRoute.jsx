@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { Navigate, Outlet } from "react-router-dom";
 
-const getRole = (token) => {
+export const getRole = (token) => {
   if (!token) return null;
 
   try {

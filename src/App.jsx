@@ -4,9 +4,9 @@ import ArticleList from "./pages/public/ArticleList";
 import RegisterUser from "./pages/auth/RegisterUser";
 import LoginAdmin from "./pages/auth/LoginAdmin";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
-import { AdminProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
 import UseAuthManager from "./store/AuthProvider";
 import NavbarAdmin from "./components/navbar/NavbarAdmin";
+import { AdminProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
