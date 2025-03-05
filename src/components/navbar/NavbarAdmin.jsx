@@ -3,9 +3,9 @@ import { AlignJustify, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "primereact/button";
 import DropDown from "./DropDown";
 import CustomSidebar from "../sidebar/Sidebar";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 
 const NavbarAdmin = ({ children }) => {
-  const toast = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const [toggle, setToggle] = useState(false);
   const scrollRef = useRef(null);
@@ -17,7 +17,6 @@ const NavbarAdmin = ({ children }) => {
   }, [children]);
 
   const [showToast, setShowToast] = useState(false);
-  const toastLogin = useRef(null);
   useEffect(() => {
     if (localStorage.getItem("isLogin") === "true") {
       setShowToast(true);
@@ -27,11 +26,16 @@ const NavbarAdmin = ({ children }) => {
 
   useEffect(() => {
     if (showToast) {
-      toast.current.show({
-        severity: "success",
-        summary: "Berhasil",
-        detail: "Anda berhasil masuk ke sistem",
-        life: 3000,
+      toast.success("Login Berhasil", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
       });
       setShowToast(false);
     }
@@ -39,6 +43,7 @@ const NavbarAdmin = ({ children }) => {
 
   return (
     <div className="flex h-screen w-full">
+      <ToastContainer />
       <CustomSidebar expanded={expanded} />
       <div className="flex flex-col w-full overflow-hidden ">
         {/* Navbar */}
@@ -82,7 +87,7 @@ const NavbarAdmin = ({ children }) => {
 
         <div
           ref={scrollRef}
-          className="flex-grow bg-gray-200  dark:text-white h-auto overflow-y-scroll w-full overflow-x-auto"
+          className="flex-grow bg-blue-100  dark:text-white h-auto overflow-y-scroll w-full overflow-x-auto"
         >
           {children}
         </div>

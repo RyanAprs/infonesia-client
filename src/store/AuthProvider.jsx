@@ -26,15 +26,24 @@ const UseAuthManager = create(
             }
           );
 
-          const data = response.data.data;
+          if (response.status === 200) {
+            const data = response.data.data;
+            localStorage.setItem("isLogin", "true");
 
-          set({
-            token: data.token,
-            isAuthenticated: true,
-            loading: false,
-          });
+            set({
+              token: data.token,
+              isAuthenticated: true,
+              loading: false,
+            });
 
-          return data;
+            return data;
+          } else {
+            set({
+              loading: false,
+              isAuthenticated: false,
+              token: null,
+            });
+          }
         } catch (error) {
           set({
             error: error.message,

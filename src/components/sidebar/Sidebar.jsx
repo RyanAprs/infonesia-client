@@ -8,6 +8,7 @@ import {
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
+import logo from "../../assets/infonesia-logo.png";
 
 const CustomSidebar = ({ expanded }) => {
   const [toggle, setToggle] = useState(false);
@@ -45,20 +46,20 @@ const CustomSidebar = ({ expanded }) => {
             <>
               <div>
                 <img
-                  src={""}
+                  src={logo}
                   alt="LOGO"
                   className={`${
                     expanded ? "hidden" : "block"
                   } w-auto px-2 max-h-20 mt-3 `}
                 />
                 <h1 className={`text-center ${expanded ? "mb-2" : "mb-3"}`}>
-                  {expanded ? " " : "Logo"}
+                  {expanded ? " " : "Infonesia"}
                 </h1>
               </div>
             </>
 
             <img
-              src={""}
+              src={logo}
               alt="LOGO "
               className={`${
                 expanded ? "block mb-5" : "hidden"
@@ -93,56 +94,56 @@ const CustomSidebar = ({ expanded }) => {
             icon={<User />}
             component={
               <Link
-                to="/admin/user"
+                to="/admin/pengguna"
                 className={`flex  hover:bg-blue-600  ${
-                  location.pathname === "/admin/user" ? "bg-blue-400" : ""
+                  location.pathname === "/admin/pengguna" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
             }
           >
-            User
+            Pengguna
           </MenuItem>
           <MenuItem
             className={`${expanded ? "mb-2" : "mb-3"}`}
             icon={<UserPen />}
             component={
               <Link
-                to="/admin/journalist"
+                to="/admin/jurnalis"
                 className={`flex  hover:bg-blue-600  ${
-                  location.pathname === "/admin/journalist" ? "bg-blue-400" : ""
+                  location.pathname === "/admin/jurnalis" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
             }
           >
-            Journalist
+            Jurnalis
           </MenuItem>
           <MenuItem
             className={`${expanded ? "mb-2" : "mb-3"}`}
             icon={<Newspaper />}
             component={
               <Link
-                to="/admin/article"
+                to="/admin/berita"
                 className={`flex  hover:bg-blue-600  ${
-                  location.pathname === "/admin/article" ? "bg-blue-400" : ""
+                  location.pathname === "/admin/berita" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
             }
           >
-            Article
+            Berita
           </MenuItem>
           <MenuItem
             className={`${expanded ? "mb-2" : "mb-3"}`}
             icon={<ClipboardList />}
             component={
               <Link
-                to="/admin/category"
+                to="/admin/kategori"
                 className={`flex  hover:bg-blue-600  ${
-                  location.pathname === "/admin/category" ? "bg-blue-400" : ""
+                  location.pathname === "/admin/kategori" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
             }
           >
-            Category
+            Kategori
           </MenuItem>
         </>
       </Menu>
