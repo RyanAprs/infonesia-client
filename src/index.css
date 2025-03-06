@@ -178,7 +178,6 @@ body {
 }
 .ql-tooltip {
   z-index: 1200 !important;
-  font-family: "Poppins";
 }
 .ql-blank,
 .ql-editor {
