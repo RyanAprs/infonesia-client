@@ -54,6 +54,25 @@ export const createUser = async (token, userData) => {
   }
 };
 
+export const createJournalist = async (token, userData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URI}/api/user/journalist`,
+      userData,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+};
+
 export const updateUser = async (token, id, userData) => {
   try {
     const response = await axios.put(
