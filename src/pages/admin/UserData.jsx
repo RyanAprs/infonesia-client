@@ -282,7 +282,7 @@ const UserData = () => {
 
   const deleteUserContent = (
     <>
-      <h1>Apakah anda yakin akan menghapus data user {currentEmail}?</h1>
+      <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
       <Button
         disabled={loading}
         className="bg-red-500 hover:bg-red-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
@@ -322,7 +322,7 @@ const UserData = () => {
       <CustomModal
         isOpen={isCreateAndUpdateModalOpen}
         onClose={() => setIsCreateAndUpdateModalOpen(false)}
-        title={isUpdateMode ? "Update User" : "Create New User"}
+        title={isUpdateMode ? "Perbarui Data User" : "Tambah Data User"}
       >
         {formUserContent}
       </CustomModal>
@@ -330,7 +330,7 @@ const UserData = () => {
       <CustomModal
         isOpen={isdeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        title={"Delete User"}
+        title={"Hapus Data User"}
       >
         {deleteUserContent}
       </CustomModal>

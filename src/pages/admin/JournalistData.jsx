@@ -286,7 +286,7 @@ const JournalistData = () => {
 
   const deleteUserContent = (
     <>
-      <h1>Apakah anda yakin akan menghapus data user {currentEmail}?</h1>
+      <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
       <Button
         disabled={loading}
         className="bg-red-500 hover:bg-red-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
