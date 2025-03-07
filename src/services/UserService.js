@@ -19,6 +19,71 @@ export const getAllUser = async (token, role) => {
     }
   } catch (error) {
     console.error("Error fetching users:", error);
-    return [];
+    throw error;
+  }
+};
+
+export const getUserById = async (token, id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URI}/api/user/${id}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+    if (response.status === 200) {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
+export const createUser = async (token, userData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URI}/api/user`, userData, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+};
+
+export const updateUser = async (token, id, userData) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URI}/api/user/${id}`,
+      userData,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (token, id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URI}/api/user/${id}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
   }
 };

@@ -1,14 +1,11 @@
 import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import {
-  AlignJustify,
   ChevronDown,
   CircleUserRoundIcon,
   DoorOpen,
   LockKeyhole,
-  User,
   UserCircle,
-  X,
 } from "lucide-react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
