@@ -87,7 +87,7 @@ export const updateUser = async (token, id, userData) => {
 
     return response;
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error updating user:", error);
     throw error;
   }
 };
@@ -102,7 +102,7 @@ export const deleteUser = async (token, id) => {
 
     return response;
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error deleting user:", error);
     throw error;
   }
 };
