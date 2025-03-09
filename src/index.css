@@ -9,6 +9,10 @@
   @tailwind utilities;
 }
 
+cropper-canvas {
+  height: 500px !important;
+}
+
 body,
 .p-button,
 .p-dropdown,

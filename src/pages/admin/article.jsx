@@ -17,7 +17,7 @@ import UseAuthManager from "../../store/AuthProvider.jsx";
 import CustomTable from "../../components/table/customTable.jsx";
 import { getAllUser } from "../../services/UserService.js";
 
-const NewsData = () => {
+const DataArtikel = () => {
   const { token } = UseAuthManager();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -571,4 +571,4 @@ const NewsData = () => {
   );
 };
 
-export default NewsData;
+export default DataArtikel;
