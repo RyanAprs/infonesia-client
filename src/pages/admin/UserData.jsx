@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CustomTable from "../../components/table/customTable";
 import {
   createUser,
@@ -9,8 +9,8 @@ import {
 } from "../../services/UserService";
 import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
-import { Bounce, toast, ToastContainer } from "react-toastify";
 import FormModal from "../../components/modal/FormModal";
+import { Toast } from "primereact/toast";
 
 const UserData = () => {
   const { token } = UseAuthManager();
@@ -29,6 +29,7 @@ const UserData = () => {
   const [isCreateAndUpdateModalOpen, setIsCreateAndUpdateModalOpen] =
     useState(false);
   const [isdeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const toast = useRef(null);
 
   const columns = [
     { field: "fullName", header: "Nama Pengguna" },
@@ -95,16 +96,11 @@ const UserData = () => {
       const response = await createUser(token, data);
 
       if (response.status === 201) {
-        toast.success("Create Pengguna Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Pengguna Ditambahkan",
+          life: 3000,
         });
         fetchUser();
         setIsCreateAndUpdateModalOpen(false);
@@ -112,16 +108,11 @@ const UserData = () => {
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 409) {
-        toast.error("Email sudah terdaftar, gunakan email yang lain!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar, gunakan email yang lain!",
+          life: 3000,
         });
       }
     } finally {
@@ -148,16 +139,11 @@ const UserData = () => {
       const response = await updateUser(token, currentId, data);
 
       if (response.status === 200) {
-        toast.success("Update Pengguna Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Pengguna Diperbarui",
+          life: 3000,
         });
         fetchUser();
         setIsCreateAndUpdateModalOpen(false);
@@ -165,16 +151,11 @@ const UserData = () => {
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 422) {
-        toast.error("Email sudah terdaftar, gunakan email yang lain!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar, gunakan email yang lain!",
+          life: 3000,
         });
       }
     } finally {
@@ -187,16 +168,11 @@ const UserData = () => {
     try {
       const response = await deleteUser(token, currentId);
       if (response.status === 200) {
-        toast.success("Delete Pengguna Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Pengguna Dihapus",
+          life: 3000,
         });
         fetchUser();
         setIsDeleteModalOpen(false);
@@ -210,7 +186,10 @@ const UserData = () => {
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
-      <ToastContainer />
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+      />{" "}
       <div className="min-h-screen  bg-white rounded-xl">
         <CustomTable
           columns={columns}
@@ -220,7 +199,6 @@ const UserData = () => {
           onDelete={handleDeleteModalOpen}
         />
       </div>
-
       <FormModal
         visible={isCreateAndUpdateModalOpen}
         onHide={() => setIsCreateAndUpdateModalOpen(false)}
@@ -286,7 +264,6 @@ const UserData = () => {
           </div>
         </div>
       </FormModal>
-
       <FormModal
         visible={isdeleteModalOpen}
         onHide={() => setIsDeleteModalOpen(false)}

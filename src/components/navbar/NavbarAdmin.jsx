@@ -3,12 +3,13 @@ import { AlignJustify, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "primereact/button";
 import DropDown from "./DropDown";
 import CustomSidebar from "../sidebar/Sidebar";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { Toast } from "primereact/toast";
 
 const NavbarAdmin = ({ children }) => {
   const [expanded, setExpanded] = useState(false);
   const [toggle, setToggle] = useState(false);
   const scrollRef = useRef(null);
+  const toast = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -26,16 +27,10 @@ const NavbarAdmin = ({ children }) => {
 
   useEffect(() => {
     if (showToast) {
-      toast.success("Login Berhasil", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
+      toast.current.show({
+        severity: "success",
+        summary: "Berhasil Login",
+        life: 3000,
       });
       setShowToast(false);
     }
@@ -43,7 +38,10 @@ const NavbarAdmin = ({ children }) => {
 
   return (
     <div className="flex h-screen w-full">
-      <ToastContainer />
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+      />{" "}
       <CustomSidebar expanded={expanded} />
       <div className="flex flex-col w-full overflow-hidden ">
         {/* Navbar */}

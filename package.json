@@ -29,7 +29,6 @@
     "react-modal": "^3.16.3",
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^7.2.0",
-    "react-toastify": "^11.0.5",
     "tailwindcss": "^3.4.17",
     "zustand": "^5.0.3"
   },

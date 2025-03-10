@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import {
   ChevronDown,
@@ -8,15 +8,13 @@ import {
   UserCircle,
 } from "lucide-react";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { CustomModal } from "../modal/CustomModal";
 import UseAuthManager from "../../store/AuthProvider";
 import { getRole } from "../ProtectedRoute/ProtectedRoute";
 import { useNavigate } from "react-router-dom";
+import FormModal from "../modal/FormModal";
 
 const DropDown = () => {
-  const { logout, token } = UseAuthManager();
+  const { logout, token, checkProfile } = UseAuthManager();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -24,7 +22,6 @@ const DropDown = () => {
     useState(false);
   const [isButtonLoading, setButtonLoading] = useState(null);
   const navigate = useNavigate();
-
   const [dataPassword, setDataPassword] = useState({
     currentPassword: "",
     newPassword: "",
@@ -35,6 +32,21 @@ const DropDown = () => {
     fullName: "",
     email: "",
   });
+
+  const getProfileData = async () => {
+    const response = await checkProfile();
+
+    setDataProfile({
+      fullName: response.fullName,
+      email: response.email,
+    });
+
+    console.log(response.email);
+  };
+
+  useEffect(() => {
+    getProfileData();
+  }, []);
 
   const handleUpdateProfile = async () => {
     //   try {
@@ -115,9 +127,18 @@ const DropDown = () => {
     setIsProfileModalOpen(false);
   };
 
+  const handleCloseUpdateModal = () => {
+    setDataProfile({
+      fullName: dataProfile.fullName,
+      email: dataProfile.email,
+    });
+    getProfileData();
+
+    setIsUpdateProfileModalOpen(false);
+  };
+
   const handleLogout = () => {
     const role = getRole(token);
-    logout();
 
     if (role === "ADMIN") {
       navigate("/admin/login");
@@ -126,6 +147,10 @@ const DropDown = () => {
     } else {
       navigate("/login");
     }
+
+    setTimeout(() => {
+      logout();
+    }, 100);
   };
 
   const menuSections = [
@@ -155,176 +180,6 @@ const DropDown = () => {
       activeClassName: "hover:bg-blue-300 hover:text-white",
     },
   ];
-
-  const detailProfileModalContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Name
-      </label>
-      <InputText
-        disabled
-        type="text"
-        placeholder="Name"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataProfile.fullName}
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Email:
-      </label>
-      <InputText
-        disabled
-        type="email"
-        placeholder="Email"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataProfile.fullName}
-      />
-
-      <Button
-        disabled={isButtonLoading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen  hover:bg-mainDarkGreen  p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleOpenUpdateModal}
-      >
-        {isButtonLoading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="white"
-          />
-        ) : (
-          <p>Change Profile</p>
-        )}
-      </Button>
-    </>
-  );
-
-  const passwordModalContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Current Password:
-      </label>
-      <input
-        type="password"
-        placeholder="Current password"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataPassword.currentPassword}
-        onChange={(e) =>
-          setDataPassword((prev) => ({
-            ...prev,
-            currentPassword: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        New Password:
-      </label>
-      <input
-        type="password"
-        placeholder="New password"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataPassword.newPassword}
-        onChange={(e) =>
-          setDataPassword((prev) => ({
-            ...prev,
-            newPassword: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Confirm Password:
-      </label>
-      <input
-        type="password"
-        placeholder="Confirm password"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataPassword.confirmPassword}
-        onChange={(e) =>
-          setDataPassword((prev) => ({
-            ...prev,
-            confirmPassword: e.target.value,
-          }))
-        }
-      />
-      {errors.confirmPassword && (
-        <small className="p-error -mt-3 text-sm">
-          {errors.confirmPassword}
-        </small>
-      )}
-
-      <Button
-        disabled={isButtonLoading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen  hover:bg-mainDarkGreen  p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleChangePassword}
-      >
-        {isButtonLoading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="white"
-          />
-        ) : (
-          <p>Save Changes</p>
-        )}
-      </Button>
-    </>
-  );
-
-  const updateProfileModalContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Name
-      </label>
-      <InputText
-        type="text"
-        placeholder="Name"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataProfile.fullName}
-        onChange={(e) =>
-          setDataProfile((prev) => ({
-            ...prev,
-            fullName: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Email:
-      </label>
-      <InputText
-        type="email"
-        placeholder="Email"
-        className="p-input text-lg p-3 rounded border-2"
-        value={dataProfile.fullName}
-        onChange={(e) =>
-          setDataProfile((prev) => ({
-            ...prev,
-            email: e.target.value,
-          }))
-        }
-      />
-
-      <Button
-        disabled={isButtonLoading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen  hover:bg-mainDarkGreen  p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleUpdateProfile}
-      >
-        {isButtonLoading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="white"
-          />
-        ) : (
-          <p>Save Changes</p>
-        )}
-      </Button>
-    </>
-  );
 
   return (
     <>
@@ -375,29 +230,148 @@ const DropDown = () => {
         </>
       </Menu>
 
-      <CustomModal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
-        title="Profile Detail"
+      <FormModal
+        visible={isProfileModalOpen}
+        onHide={() => setIsProfileModalOpen(false)}
+        title={"Detail Profile"}
+        submitLabel="Ubah Profile"
+        onSubmit={handleOpenUpdateModal}
       >
-        {detailProfileModalContent}
-      </CustomModal>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Name
+            </label>
+            <InputText
+              disabled
+              type="text"
+              placeholder="Name"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataProfile.fullName}
+            />
 
-      <CustomModal
-        isOpen={isPasswordModalOpen}
-        onClose={() => setIsPasswordModalOpen(false)}
-        title="Change Password"
-      >
-        {passwordModalContent}
-      </CustomModal>
+            <label htmlFor="" className="-mb-3">
+              Email:
+            </label>
+            <InputText
+              disabled
+              type="email"
+              placeholder="Email"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataProfile.email}
+            />
+          </div>
+        </div>
+      </FormModal>
 
-      <CustomModal
-        isOpen={isUpdateProfileModalOpen}
-        onClose={() => setIsUpdateProfileModalOpen(false)}
-        title="Change Profile"
+      <FormModal
+        visible={isPasswordModalOpen}
+        onHide={() => setIsPasswordModalOpen(false)}
+        title={"Ubah Password"}
+        submitLabel="Simpan"
+        onSubmit={handleChangePassword}
       >
-        {updateProfileModalContent}
-      </CustomModal>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Current Password:
+            </label>
+            <input
+              type="password"
+              placeholder="Current password"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataPassword.currentPassword}
+              onChange={(e) =>
+                setDataPassword((prev) => ({
+                  ...prev,
+                  currentPassword: e.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="" className="-mb-3">
+              New Password:
+            </label>
+            <input
+              type="password"
+              placeholder="New password"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataPassword.newPassword}
+              onChange={(e) =>
+                setDataPassword((prev) => ({
+                  ...prev,
+                  newPassword: e.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="" className="-mb-3">
+              Confirm Password:
+            </label>
+            <input
+              type="password"
+              placeholder="Confirm password"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataPassword.confirmPassword}
+              onChange={(e) =>
+                setDataPassword((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+            />
+            {errors.confirmPassword && (
+              <small className="p-error -mt-3 text-sm">
+                {errors.confirmPassword}
+              </small>
+            )}
+          </div>
+        </div>
+      </FormModal>
+
+      <FormModal
+        visible={isUpdateProfileModalOpen}
+        onHide={handleCloseUpdateModal}
+        title={"Ubah Profile"}
+        submitLabel="Simpan"
+        onSubmit={handleUpdateProfile}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Name
+            </label>
+            <InputText
+              type="text"
+              placeholder="Name"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataProfile.fullName}
+              onChange={(e) =>
+                setDataProfile((prev) => ({
+                  ...prev,
+                  fullName: e.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="" className="-mb-3">
+              Email:
+            </label>
+            <InputText
+              type="email"
+              placeholder="Email"
+              className="p-input text-lg p-3 rounded border-2"
+              value={dataProfile.email}
+              onChange={(e) =>
+                setDataProfile((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+      </FormModal>
     </>
   );
 };

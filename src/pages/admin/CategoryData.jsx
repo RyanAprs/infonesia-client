@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createCategory,
   deleteCategory,
@@ -7,10 +7,10 @@ import {
   updateCategory,
 } from "../../services/categoryService";
 import UseAuthManager from "../../store/AuthProvider";
-import { Bounce, toast, ToastContainer } from "react-toastify";
 import { InputText } from "primereact/inputtext";
 import FormModal from "../../components/modal/FormModal";
 import CustomTable from "../../components/table/customTable";
+import { Toast } from "primereact/toast";
 
 const CategoryData = () => {
   const { token } = UseAuthManager();
@@ -25,6 +25,7 @@ const CategoryData = () => {
   const [isCreateAndUpdateModalOpen, setIsCreateAndUpdateModalOpen] =
     useState(false);
   const [isdeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const toast = useRef(null);
 
   const columns = [
     { field: "name", header: "Nama Kategori" },
@@ -86,16 +87,11 @@ const CategoryData = () => {
       console.log(response);
 
       if (response.status === 201) {
-        toast.success("Create kategori Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Kategori Ditambahkan",
+          life: 3000,
         });
         fetchCategory();
         setIsCreateAndUpdateModalOpen(false);
@@ -124,16 +120,11 @@ const CategoryData = () => {
       const response = await updateCategory(token, currentId, data);
 
       if (response.status === 200) {
-        toast.success("Update kategori Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Kategpri Diperbarui",
+          life: 3000,
         });
         fetchCategory();
         setIsCreateAndUpdateModalOpen(false);
@@ -150,16 +141,11 @@ const CategoryData = () => {
     try {
       const response = await deleteCategory(token, currentId);
       if (response.status === 200) {
-        toast.success("Delete Kategori Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Kategori Dihapus",
+          life: 3000,
         });
         fetchCategory();
         setIsDeleteModalOpen(false);
@@ -173,7 +159,10 @@ const CategoryData = () => {
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
-      <ToastContainer />
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+      />{" "}
       <div className="min-h-screen  bg-white rounded-xl">
         <CustomTable
           columns={columns}
@@ -183,7 +172,6 @@ const CategoryData = () => {
           onDelete={handleDeleteModalOpen}
         />
       </div>
-
       <FormModal
         visible={isCreateAndUpdateModalOpen}
         onHide={() => setIsCreateAndUpdateModalOpen(false)}
@@ -212,7 +200,6 @@ const CategoryData = () => {
           </div>
         </div>
       </FormModal>
-
       <FormModal
         visible={isdeleteModalOpen}
         onHide={() => setIsDeleteModalOpen(false)}

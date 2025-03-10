@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import CustomTable from "../../components/table/customTable";
 import {
   createJournalist,
@@ -9,8 +9,8 @@ import {
 } from "../../services/UserService";
 import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
-import { Bounce, toast, ToastContainer } from "react-toastify";
 import FormModal from "../../components/modal/FormModal";
+import { Toast } from "primereact/toast";
 
 const JournalistData = () => {
   const { token } = UseAuthManager();
@@ -29,6 +29,7 @@ const JournalistData = () => {
   const [isCreateAndUpdateModalOpen, setIsCreateAndUpdateModalOpen] =
     useState(false);
   const [isdeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const toast = useRef(null);
 
   const columns = [
     { field: "fullName", header: "Nama Jurnalis" },
@@ -95,16 +96,11 @@ const JournalistData = () => {
       const response = await createJournalist(token, data);
 
       if (response.status === 201) {
-        toast.success("Create Jurnalis Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Pengguna Ditambahkan",
+          life: 3000,
         });
         fetchJournalist();
         setIsCreateAndUpdateModalOpen(false);
@@ -112,16 +108,11 @@ const JournalistData = () => {
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 409) {
-        toast.error("Email sudah terdaftar, gunakan email yang lain!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar, gunakan email yang lain!",
+          life: 3000,
         });
       }
     } finally {
@@ -148,16 +139,11 @@ const JournalistData = () => {
       const response = await updateUser(token, currentId, data);
 
       if (response.status === 200) {
-        toast.success("Update Jurnalis Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Jurnalis Diperbarui",
+          life: 3000,
         });
         fetchJournalist();
         setIsCreateAndUpdateModalOpen(false);
@@ -165,16 +151,11 @@ const JournalistData = () => {
     } catch (error) {
       console.log(error.response.status);
       if (error.response.status === 422) {
-        toast.error("Email sudah terdaftar, gunakan email yang lain!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar, gunakan email yang lain!",
+          life: 3000,
         });
       }
     } finally {
@@ -187,16 +168,11 @@ const JournalistData = () => {
     try {
       const response = await deleteUser(token, currentId);
       if (response.status === 200) {
-        toast.success("Delete Jurnalis Berhasil!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Jurnalis Dihapus",
+          life: 3000,
         });
         fetchJournalist();
         setIsDeleteModalOpen(false);
@@ -214,7 +190,10 @@ const JournalistData = () => {
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
-      <ToastContainer />
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+      />{" "}
       <div className="min-h-screen  bg-white rounded-xl">
         <CustomTable
           columns={columns}
@@ -224,7 +203,6 @@ const JournalistData = () => {
           onDelete={handleDeleteModalOpen}
         />
       </div>
-
       <FormModal
         visible={isCreateAndUpdateModalOpen}
         onHide={() => setIsCreateAndUpdateModalOpen(false)}
@@ -292,7 +270,6 @@ const JournalistData = () => {
           </div>
         </div>
       </FormModal>
-
       <FormModal
         visible={isdeleteModalOpen}
         onHide={() => setIsDeleteModalOpen(false)}

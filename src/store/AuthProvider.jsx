@@ -2,6 +2,8 @@ import axios from "axios";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+const API_BASE_URI = import.meta.env.VITE_API_BASE_URI;
+
 const UseAuthManager = create(
   persist(
     (set, get) => ({
@@ -16,7 +18,7 @@ const UseAuthManager = create(
 
         try {
           const response = await axios.post(
-            "http://localhost:5000/api/auth/login",
+            `${API_BASE_URI}/api/auth/login`,
             {
               email,
               password,
@@ -59,13 +61,9 @@ const UseAuthManager = create(
         set({ loading: true, error: null });
 
         try {
-          await axios.post(
-            "http://localhost:5000/api/auth/register",
-            userData,
-            {
-              headers: { "Content-Type": "application/json" },
-            }
-          );
+          await axios.post(`${API_BASE_URI}/api/auth/register`, userData, {
+            headers: { "Content-Type": "application/json" },
+          });
           set({
             loading: false,
           });
@@ -88,36 +86,22 @@ const UseAuthManager = create(
       },
 
       // Check if token is valid and update user data
-      checkAuth: async () => {
+      checkProfile: async () => {
         const token = get().token;
         if (!token) return false;
 
         set({ loading: true });
 
         try {
-          const response = await fetch("https://your-api.com/auth/me", {
+          const response = await axios.get(`${API_BASE_URI}/api/user/current`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
 
-          if (!response.ok) {
-            throw new Error("Token invalid");
-          }
-
-          set({
-            isAuthenticated: true,
-            loading: false,
-          });
-
-          return true;
+          return response.data.data;
         } catch (error) {
           console.log(error);
-          set({
-            token: null,
-            isAuthenticated: false,
-            loading: false,
-          });
 
           return false;
         }
