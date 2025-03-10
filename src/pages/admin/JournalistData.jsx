@@ -9,10 +9,8 @@ import {
 } from "../../services/UserService";
 import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { CustomModal } from "../../components/modal/CustomModal";
 import { Bounce, toast, ToastContainer } from "react-toastify";
+import FormModal from "../../components/modal/FormModal";
 
 const JournalistData = () => {
   const { token } = UseAuthManager();
@@ -74,7 +72,7 @@ const JournalistData = () => {
     setCurrentEmail(data.email);
   };
 
-  const handleCreateUser = async () => {
+  const handleCreateJournalist = async () => {
     setLoading(true);
 
     if (
@@ -131,7 +129,7 @@ const JournalistData = () => {
     }
   };
 
-  const handleUpdateUser = async () => {
+  const handleUpdateJournalist = async () => {
     setLoading(true);
 
     if (!JournalistData.fullName || !JournalistData.email) {
@@ -184,7 +182,7 @@ const JournalistData = () => {
     }
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteJournalist = async () => {
     setLoading(true);
     try {
       const response = await deleteUser(token, currentId);
@@ -210,102 +208,6 @@ const JournalistData = () => {
     }
   };
 
-  const formJournalistContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Nama Jurnalis
-      </label>
-      <InputText
-        type="text"
-        placeholder="Nama Jurnalis"
-        className="p-input text-lg p-3 rounded border-2"
-        value={JournalistData.fullName}
-        onChange={(e) =>
-          setJournalistData((prev) => ({
-            ...prev,
-            fullName: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Email:
-      </label>
-      <InputText
-        type="email"
-        placeholder="Email"
-        className="p-input text-lg p-3 rounded border-2"
-        value={JournalistData.email}
-        onChange={(e) =>
-          setJournalistData((prev) => ({
-            ...prev,
-            email: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Password:
-      </label>
-      <input
-        type="password"
-        placeholder="Password"
-        className="p-input text-lg p-3 rounded border-[2px]"
-        value={JournalistData.password}
-        onChange={(e) =>
-          setJournalistData((prev) => ({
-            ...prev,
-            password: e.target.value,
-          }))
-        }
-      />
-      <span className="text-sm -mt-4">
-        {isUpdateMode ? "*Kosongkan password jika tidak ingin diubah" : null}
-      </span>
-
-      {error && <span className="text-red-500">{error}</span>}
-
-      <Button
-        disabled={loading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={isUpdateMode ? handleUpdateUser : handleCreateUser}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Simpan</p>
-        )}
-      </Button>
-    </>
-  );
-
-  const deleteUserContent = (
-    <>
-      <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
-      <Button
-        disabled={loading}
-        className="bg-red-500 hover:bg-red-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleDeleteUser}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Hapus</p>
-        )}
-      </Button>
-    </>
-  );
-
   useEffect(() => {
     fetchJournalist();
   }, []);
@@ -323,21 +225,86 @@ const JournalistData = () => {
         />
       </div>
 
-      <CustomModal
-        isOpen={isCreateAndUpdateModalOpen}
-        onClose={() => setIsCreateAndUpdateModalOpen(false)}
+      <FormModal
+        visible={isCreateAndUpdateModalOpen}
+        onHide={() => setIsCreateAndUpdateModalOpen(false)}
         title={isUpdateMode ? "Perbarui Data Jurnalis" : "Tambah Data Jurnalis"}
+        onSubmit={
+          isUpdateMode ? handleUpdateJournalist : handleCreateJournalist
+        }
       >
-        {formJournalistContent}
-      </CustomModal>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Nama Jurnalis
+            </label>
+            <InputText
+              type="text"
+              placeholder="Nama Jurnalis"
+              className="p-input text-lg p-3 rounded border-2"
+              value={JournalistData.fullName}
+              onChange={(e) =>
+                setJournalistData((prev) => ({
+                  ...prev,
+                  fullName: e.target.value,
+                }))
+              }
+            />
 
-      <CustomModal
-        isOpen={isdeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+            <label htmlFor="" className="-mb-3">
+              Email:
+            </label>
+            <InputText
+              type="email"
+              placeholder="Email"
+              className="p-input text-lg p-3 rounded border-2"
+              value={JournalistData.email}
+              onChange={(e) =>
+                setJournalistData((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="" className="-mb-3">
+              Password:
+            </label>
+            <input
+              type="password"
+              placeholder="Password"
+              className="p-input text-lg p-3 rounded border-[2px]"
+              value={JournalistData.password}
+              onChange={(e) =>
+                setJournalistData((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+            />
+            <span className="text-sm -mt-4">
+              {isUpdateMode
+                ? "*Kosongkan password jika tidak ingin diubah"
+                : null}
+            </span>
+
+            {error && <span className="text-red-500">{error}</span>}
+          </div>
+        </div>
+      </FormModal>
+
+      <FormModal
+        visible={isdeleteModalOpen}
+        onHide={() => setIsDeleteModalOpen(false)}
         title={"Hapus Data Jurnalis"}
+        onSubmit={handleDeleteJournalist}
+        submitLabel={"Hapus"}
+        isLoading={loading}
       >
-        {deleteUserContent}
-      </CustomModal>
+        <div className="text-xl">
+          <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
+        </div>
+      </FormModal>
     </div>
   );
 };

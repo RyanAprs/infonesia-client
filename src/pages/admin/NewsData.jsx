@@ -16,6 +16,8 @@ import { Scope } from "parchment";
 import UseAuthManager from "../../store/AuthProvider.jsx";
 import CustomTable from "../../components/table/customTable.jsx";
 import { getAllUser } from "../../services/UserService.js";
+import FormModal from "../../components/modal/FormModal.jsx";
+import ImageCropModal from "../../components/modal/ImageCropperModal.jsx";
 
 const NewsData = () => {
   const { token } = UseAuthManager();
@@ -436,11 +438,12 @@ const NewsData = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col gap-4 p-4 z-10 ">
+    <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
       <Toast
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
       />
+
       <div className="bg-white min-h-screen dark:bg-blackHover rounded-xl">
         <CustomTable
           columns={columns}
@@ -450,19 +453,17 @@ const NewsData = () => {
           onDelete={handleModalDelete}
         />
       </div>
-      <Dialog
-        header={isEditMode ? "Ubah Data Artikel" : "Tambah Data Artikel"}
+
+      <FormModal
         visible={visible}
-        maximizable
-        className="md:w-1/2 w-full"
-        onHide={() => {
-          if (!visible) return;
-          setVisible(false);
-        }}
-        blockScroll={true}
+        onHide={() => setVisible(false)}
+        title={isEditMode ? "Ubah Data Artikel" : "Tambah Data Artikel"}
+        onSubmit={isEditMode ? handleUpdate : handleCreate}
+        submitLabel={isEditMode ? "Edit" : "Simpan"}
+        isLoading={loading}
       >
-        <div className="flex flex-col p-4 gap-4">
-          <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             <input
               ref={fileInputRef}
               id="file-upload"
@@ -473,100 +474,46 @@ const NewsData = () => {
             />
             <label
               htmlFor="file-upload"
-              className="p-ripple cursor-pointer bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-2 w-fit flex justify-center rounded-xl hover:mainGreen transition-all"
+              className="p-ripple cursor-pointer bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-2 w-fit flex justify-center rounded-xl transition-all"
             >
               <Ripple />
               <ImageUp />
             </label>
 
-            {!croppedImage && datas.banner && isEditMode && (
-              <div>
-                <img
-                  src={`${baseUrl}${datas.banner}`}
-                  alt="Banner"
-                  className={`w-full rounded border dark:border-[#2d2d2d]`}
-                />
-              </div>
-            )}
-
             {croppedImage && (
-              <div>
+              <div className="mt-2">
                 <img
                   src={croppedImage}
-                  alt="Cropped"
-                  className={`w-full rounded border dark:border-[#2d2d2d]`}
+                  alt="Preview"
+                  className="w-full rounded border dark:border-[#2d2d2d]"
                 />
               </div>
             )}
           </div>
 
-          <Button
-            disabled={isButtonLoading}
-            className="bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-4 w-full flex justify-center rounded-xl hover:mainGreen transition-all"
-            onClick={isEditMode ? handleUpdate : handleCreate}
-          >
-            {isButtonLoading ? (
-              <ProgressSpinner
-                style={{ width: "24px", height: "24px" }}
-                strokeWidth="8"
-                animationDuration="1s"
-                color="white"
-              />
-            ) : (
-              <p>{isEditMode ? "Edit" : "Simpan"}</p>
-            )}
-          </Button>
-        </div>
-      </Dialog>
-
-      <Dialog
-        header="Preview Gambar"
-        visible={visibleCropImage}
-        className="md:w-1/2 w-full "
-        onHide={handleCloseCropModal}
-        blockScroll={true}
-        onShow={() => {
-          if (
-            selectedImage &&
-            imageRef.current &&
-            cropperRef.current === null
-          ) {
-            cropperRef.current = new Cropper(imageRef.current, {
-              aspectRatio: 1200 / 630,
-              viewMode: 1,
-              autoCropArea: 1,
-              movable: true,
-              zoomable: true,
-              scalable: false,
-              cropBoxMovable: true,
-              cropBoxResizable: true,
-              guides: true,
-              highlight: true,
-              background: true,
-            });
-          }
-        }}
-      >
-        <div className="flex flex-col gap-8">
-          <div>
-            {selectedImage && (
-              <img
-                ref={imageRef}
-                src={selectedImage}
-                alt="Selected"
-                className={`max-w-full rounded`}
-              />
-            )}
-          </div>
-          <div className="flex gap-4 items-end justify-end">
-            <Button
-              label="Crop"
-              onClick={handleCrop}
-              className="bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-4 w-full flex justify-center rounded-xl hover:mainGreen transition-all"
+          <div className="flex flex-col gap-4">
+            <input
+              type="text"
+              placeholder="Judul Artikel"
+              className="p-2 border rounded-lg dark:bg-blackHover dark:border-[#2d2d2d] dark:text-white"
+            />
+            <textarea
+              placeholder="Konten Artikel"
+              className="p-2 border rounded-lg dark:bg-blackHover dark:border-[#2d2d2d] dark:text-white"
+              rows={4}
             />
           </div>
         </div>
-      </Dialog>
+      </FormModal>
+
+      <ImageCropModal
+        visible={visibleCropImage}
+        onHide={handleCloseCropModal}
+        selectedImage={selectedImage}
+        imageRef={imageRef}
+        cropperRef={cropperRef}
+        handleCrop={handleCrop}
+      />
     </div>
   );
 };

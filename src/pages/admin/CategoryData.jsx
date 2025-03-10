@@ -8,11 +8,9 @@ import {
 } from "../../services/categoryService";
 import UseAuthManager from "../../store/AuthProvider";
 import { Bounce, toast, ToastContainer } from "react-toastify";
-import CustomTable from "../../components/table/customTable";
-import { CustomModal } from "../../components/modal/CustomModal";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { Button } from "@headlessui/react";
 import { InputText } from "primereact/inputtext";
+import FormModal from "../../components/modal/FormModal";
+import CustomTable from "../../components/table/customTable";
 
 const CategoryData = () => {
   const { token } = UseAuthManager();
@@ -173,67 +171,6 @@ const CategoryData = () => {
     }
   };
 
-  const formCategoryContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Nama Kategori
-      </label>
-      <InputText
-        type="text"
-        placeholder="Nama Kategori"
-        className="p-input text-lg p-3 rounded border-2"
-        value={categoryData.name}
-        onChange={(e) =>
-          setCategoryData((prev) => ({
-            ...prev,
-            name: e.target.value,
-          }))
-        }
-      />
-
-      {error && <span className="text-red-500">{error}</span>}
-
-      <Button
-        disabled={loading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={isUpdateMode ? handleUpdateCategory : handleCreateCategory}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Simpan</p>
-        )}
-      </Button>
-    </>
-  );
-
-  const deleteCategoryContent = (
-    <>
-      <h1>Apakah anda yakin akan menghapus data ini?</h1>
-      <Button
-        disabled={loading}
-        className="bg-red-500 hover:bg-red-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleDeleteCategory}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Hapus</p>
-        )}
-      </Button>
-    </>
-  );
-
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
       <ToastContainer />
@@ -247,21 +184,47 @@ const CategoryData = () => {
         />
       </div>
 
-      <CustomModal
-        isOpen={isCreateAndUpdateModalOpen}
-        onClose={() => setIsCreateAndUpdateModalOpen(false)}
+      <FormModal
+        visible={isCreateAndUpdateModalOpen}
+        onHide={() => setIsCreateAndUpdateModalOpen(false)}
         title={isUpdateMode ? "Perbarui Data Kategori" : "Tambah Data Kategori"}
+        onSubmit={isUpdateMode ? handleUpdateCategory : handleCreateCategory}
       >
-        {formCategoryContent}
-      </CustomModal>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Nama Kategori
+            </label>
+            <InputText
+              type="text"
+              placeholder="Nama Kategori"
+              className="p-input text-lg p-3 rounded border-2"
+              value={categoryData.name}
+              onChange={(e) =>
+                setCategoryData((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }))
+              }
+            />
 
-      <CustomModal
-        isOpen={isdeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+            {error && <span className="text-red-500">{error}</span>}
+          </div>
+        </div>
+      </FormModal>
+
+      <FormModal
+        visible={isdeleteModalOpen}
+        onHide={() => setIsDeleteModalOpen(false)}
         title={"Hapus Data Kategori"}
+        onSubmit={handleDeleteCategory}
+        submitLabel={"Hapus"}
+        isLoading={loading}
       >
-        {deleteCategoryContent}
-      </CustomModal>
+        <div className="text-xl">
+          <h1>Apakah anda yakin akan menghapus data ini?</h1>
+        </div>
+      </FormModal>
     </div>
   );
 };

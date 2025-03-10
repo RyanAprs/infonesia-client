@@ -9,10 +9,8 @@ import {
 } from "../../services/UserService";
 import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { CustomModal } from "../../components/modal/CustomModal";
 import { Bounce, toast, ToastContainer } from "react-toastify";
+import FormModal from "../../components/modal/FormModal";
 
 const UserData = () => {
   const { token } = UseAuthManager();
@@ -210,102 +208,6 @@ const UserData = () => {
     }
   };
 
-  const formUserContent = (
-    <>
-      <label htmlFor="" className="-mb-3">
-        Nama Pengguna
-      </label>
-      <InputText
-        type="text"
-        placeholder="Nama Pengguna"
-        className="p-input text-lg p-3 rounded border-2"
-        value={userData.fullName}
-        onChange={(e) =>
-          setUserData((prev) => ({
-            ...prev,
-            fullName: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Email:
-      </label>
-      <InputText
-        type="email"
-        placeholder="Email"
-        className="p-input text-lg p-3 rounded border-2"
-        value={userData.email}
-        onChange={(e) =>
-          setUserData((prev) => ({
-            ...prev,
-            email: e.target.value,
-          }))
-        }
-      />
-
-      <label htmlFor="" className="-mb-3">
-        Password:
-      </label>
-      <input
-        type="password"
-        placeholder="Password"
-        className="p-input text-lg p-3 rounded border-[2px]"
-        value={userData.password}
-        onChange={(e) =>
-          setUserData((prev) => ({
-            ...prev,
-            password: e.target.value,
-          }))
-        }
-      />
-      <span className="text-sm -mt-4">
-        {isUpdateMode ? "*Kosongkan password jika tidak ingin diubah" : null}
-      </span>
-
-      {error && <span className="text-red-500">{error}</span>}
-
-      <Button
-        disabled={loading}
-        className="bg-blue-500 hover:bg-blue-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={isUpdateMode ? handleUpdateUser : handleCreateUser}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Simpan</p>
-        )}
-      </Button>
-    </>
-  );
-
-  const deleteUserContent = (
-    <>
-      <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
-      <Button
-        disabled={loading}
-        className="bg-red-500 hover:bg-red-400 text-white dark:bg-extraLightGreen   p-4 w-full flex justify-center rounded transition-all"
-        onClick={handleDeleteUser}
-      >
-        {loading ? (
-          <ProgressSpinner
-            style={{ width: "25px", height: "25px" }}
-            strokeWidth="8"
-            animationDuration="1s"
-            color="black"
-          />
-        ) : (
-          <p>Hapus</p>
-        )}
-      </Button>
-    </>
-  );
-
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
       <ToastContainer />
@@ -319,21 +221,84 @@ const UserData = () => {
         />
       </div>
 
-      <CustomModal
-        isOpen={isCreateAndUpdateModalOpen}
-        onClose={() => setIsCreateAndUpdateModalOpen(false)}
+      <FormModal
+        visible={isCreateAndUpdateModalOpen}
+        onHide={() => setIsCreateAndUpdateModalOpen(false)}
         title={isUpdateMode ? "Perbarui Data User" : "Tambah Data User"}
+        onSubmit={isUpdateMode ? handleUpdateUser : handleCreateUser}
       >
-        {formUserContent}
-      </CustomModal>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <label htmlFor="" className="-mb-3">
+              Nama Pengguna
+            </label>
+            <InputText
+              type="text"
+              placeholder="Nama Pengguna"
+              className="p-input text-lg p-3 rounded border-2"
+              value={userData.fullName}
+              onChange={(e) =>
+                setUserData((prev) => ({
+                  ...prev,
+                  fullName: e.target.value,
+                }))
+              }
+            />
 
-      <CustomModal
-        isOpen={isdeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+            <label htmlFor="" className="-mb-3">
+              Email:
+            </label>
+            <InputText
+              type="email"
+              placeholder="Email"
+              className="p-input text-lg p-3 rounded border-2"
+              value={userData.email}
+              onChange={(e) =>
+                setUserData((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="" className="-mb-3">
+              Password:
+            </label>
+            <input
+              type="password"
+              placeholder="Password"
+              className="p-input text-lg p-3 rounded border-[2px]"
+              value={userData.password}
+              onChange={(e) =>
+                setUserData((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+            />
+            <span className="text-sm -mt-4">
+              {isUpdateMode
+                ? "*Kosongkan password jika tidak ingin diubah"
+                : null}
+            </span>
+
+            {error && <span className="text-red-500">{error}</span>}
+          </div>
+        </div>
+      </FormModal>
+
+      <FormModal
+        visible={isdeleteModalOpen}
+        onHide={() => setIsDeleteModalOpen(false)}
         title={"Hapus Data User"}
+        onSubmit={handleDeleteUser}
+        submitLabel={"Hapus"}
+        isLoading={loading}
       >
-        {deleteUserContent}
-      </CustomModal>
+        <div className="text-xl">
+          <h1>Apakah anda yakin akan menghapus data {currentEmail}?</h1>
+        </div>
+      </FormModal>
     </div>
   );
 };
