@@ -6,7 +6,7 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { Search, Trash2, Edit, Plus } from "lucide-react";
 
-const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/static/`;
+const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/uploads/images/`;
 
 export default function CustomTable({
   data,
@@ -86,7 +86,7 @@ export default function CustomTable({
 
     const valueString = value ? value.toString() : "";
 
-    if (field.includes("banner")) {
+    if (field.includes("bannerImage")) {
       if (valueString) {
         return (
           <img

@@ -1,6 +1,3 @@
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
@@ -11,13 +8,24 @@ import { useCallback } from "react";
 import { ImageUp } from "lucide-react";
 import { Ripple } from "primereact/ripple";
 import ResizeModule from "@botom/quill-resize-module";
-const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/static/`;
 import { Scope } from "parchment";
 import UseAuthManager from "../../store/AuthProvider.jsx";
 import CustomTable from "../../components/table/customTable.jsx";
 import { getAllUser } from "../../services/UserService.js";
 import FormModal from "../../components/modal/FormModal.jsx";
 import ImageCropModal from "../../components/modal/ImageCropperModal.jsx";
+import CustomDropdown from "../../components/dropDown/CustomDropDown.jsx";
+import { InputText } from "primereact/inputtext";
+import ImageFormat from "../../utils/ImageFormat.js";
+import VideoBlot from "../../utils/VideoBlot.js";
+import { Editor } from "primereact/editor";
+import { getAllCategory } from "../../services/categoryService.js";
+import { createNews, getAllNews } from "../../services/ArticleService.js";
+import { NewsCreateSchemaAdmin } from "../../validations/NewsSchema.jsx";
+import { ZodError } from "zod";
+import TagInput from "../../components/tagInput/TagInput.jsx";
+import { InputTextarea } from "primereact/inputtextarea";
+const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/uploads/images/`;
 
 const NewsData = () => {
   const { token } = UseAuthManager();
@@ -26,9 +34,13 @@ const NewsData = () => {
   const [visible, setVisible] = useState(false);
   const [visibleDelete, setVisibleDelete] = useState(false);
   const [datas, setDatas] = useState({
-    authorId: "",
     title: "",
-    banner: "",
+    content: "",
+    summary: "",
+    bannerImage: "",
+    authorId: "",
+    categoryId: 0,
+    tags: [],
   });
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentId, setCurrentId] = useState("");
@@ -39,9 +51,11 @@ const NewsData = () => {
   const [isConnectionError, setisConnectionError] = useState(false);
   const [isButtonLoading, setIsButtonLoading] = useState(null);
   const [author, setAuthor] = useState([]);
+  const [category, setCategory] = useState([]);
   const [visibleCropImage, setVisibleCropImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [croppedImage, setCroppedImage] = useState(null);
+  const [tagList, setTagList] = useState([]);
   const imageRef = useRef(null);
   const cropperRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -51,145 +65,25 @@ const NewsData = () => {
     editorContentRef.current = htmlValue;
   }, []);
 
-  const ImageFormatAttributesList = ["height", "width", "style"];
-  const allowedStyles = {
-    display: ["inline"],
-    float: ["left", "right"],
-    margin: [],
+  Quill.register(ImageFormat, true);
+  Quill.register("modules/resize", ResizeModule);
+
+  VideoBlot.blotName = "video";
+  VideoBlot.tagName = "iframe";
+  VideoBlot.scope = Scope.BLOCK_BLOT;
+
+  Quill.register(VideoBlot);
+
+  const fetchData = async () => {
+    const response = await getAllNews(token);
+    console.log(response);
+
+    setData(response);
   };
-  const BaseImageFormat = Quill.import("formats/image");
-  //   class ImageFormat extends BaseImageFormat {
-  //     static formats(domNode) {
-  //       const formats = {};
-  //       ImageFormatAttributesList.forEach((attribute) => {
-  //         if (domNode.hasAttribute(attribute)) {
-  //           formats[attribute] = domNode.getAttribute(attribute);
-  //         }
-  //       });
-  //       return formats;
-  //     }
-  //     format(name, value) {
-  //       if (ImageFormatAttributesList.includes(name)) {
-  //         if (name === "style" && value) {
-  //           const styleEntries = value
-  //             .split(";")
-  //             .map((entry) => entry.trim())
-  //             .filter(Boolean);
-  //           const newStyles = {};
-
-  //           styleEntries.forEach((entry) => {
-  //             const [key, val] = entry.split(":").map((item) => item.trim());
-  //             if (
-  //               allowedStyles[key] &&
-  //               (allowedStyles[key].length === 0 ||
-  //                 allowedStyles[key].includes(val))
-  //             ) {
-  //               newStyles[key] = val;
-  //             }
-  //           });
-  //           const styleString = Object.entries(newStyles)
-  //             .map(([key, val]) => `${key}: ${val}`)
-  //             .join("; ");
-  //           this.domNode.setAttribute("style", styleString);
-  //         } else if (value) {
-  //           this.domNode.setAttribute(name, value);
-  //         } else {
-  //           this.domNode.removeAttribute(name);
-  //         }
-  //       } else {
-  //         super.format(name, value);
-  //       }
-  //     }
-  //   }
-  //   Quill.register(ImageFormat, true);
-  //   Quill.register("modules/resize", ResizeModule);
-
-  //   const BlockEmbed = Quill.import("blots/block/embed");
-
-  //   class VideoBlot extends BlockEmbed {
-  //     static create(value) {
-  //       const node = super.create(value);
-  //       node.setAttribute("contenteditable", "false");
-  //       node.setAttribute("frameborder", "0");
-  //       node.setAttribute("allowfullscreen", true);
-  //       node.setAttribute("src", this.sanitize(value));
-  //       return node;
-  //     }
-
-  //     static sanitize(url) {
-  //       return url;
-  //     }
-
-  //     static formats(domNode) {
-  //       const formats = {};
-  //       const attrs = ["height", "width", "style"];
-  //       attrs.forEach((attr) => {
-  //         if (domNode.hasAttribute(attr)) {
-  //           formats[attr] = domNode.getAttribute(attr);
-  //         }
-  //       });
-  //       return formats;
-  //     }
-
-  //     format(name, value) {
-  //       const allowedStyles = {
-  //         display: ["inline", "block"],
-  //         float: ["left", "right", "none"],
-  //         margin: [],
-  //         "max-width": [],
-  //         "max-height": [],
-  //       };
-
-  //       if (["height", "width", "style"].includes(name)) {
-  //         if (name === "style" && value) {
-  //           const styleEntries = value
-  //             .split(";")
-  //             .map((entry) => entry.trim())
-  //             .filter(Boolean);
-  //           const newStyles = {};
-
-  //           styleEntries.forEach((entry) => {
-  //             const [key, val] = entry.split(":").map((item) => item.trim());
-  //             if (
-  //               allowedStyles[key] &&
-  //               (allowedStyles[key].length === 0 ||
-  //                 allowedStyles[key].includes(val))
-  //             ) {
-  //               newStyles[key] = val;
-  //             }
-  //           });
-
-  //           const styleString = Object.entries(newStyles)
-  //             .map(([key, val]) => `${key}: ${val}`)
-  //             .join("; ");
-
-  //           this.domNode.setAttribute("style", styleString);
-  //         } else if (value) {
-  //           this.domNode.setAttribute(name, value);
-  //         } else {
-  //           this.domNode.removeAttribute(name);
-  //         }
-  //       } else {
-  //         super.format(name, value);
-  //       }
-  //     }
-
-  //     static value(domNode) {
-  //       return domNode.getAttribute("src");
-  //     }
-  //   }
-
-  //   VideoBlot.blotName = "video";
-  //   VideoBlot.tagName = "iframe";
-  //   VideoBlot.scope = Scope.BLOCK_BLOT;
-
-  //   Quill.register(VideoBlot);
-
-  const fetchData = async () => {};
 
   useEffect(() => {
     fetchData();
-  }, [token, navigate]);
+  }, []);
 
   const handleModalCreate = async () => {
     setErrors({});
@@ -203,10 +97,13 @@ const NewsData = () => {
     setIsEditMode(false);
 
     try {
-      const response = await getAllUser(token, "JOURNALIST");
-      console.log(response);
+      const responseUser = await getAllUser(token, "JOURNALIST");
+      const responseCategory = await getAllCategory(token);
 
-      setAuthor(response);
+      console.log(responseCategory);
+
+      setAuthor(responseUser);
+      setCategory(responseCategory);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -215,7 +112,52 @@ const NewsData = () => {
     }
   };
 
-  const handleCreate = async () => {};
+  const handleCreate = async () => {
+    try {
+      setLoading(true);
+
+      const dataToSubmit = {
+        ...datas,
+        content: editorContentRef.current,
+        categoryId: parseInt(datas.categoryId, 10),
+      };
+
+      NewsCreateSchemaAdmin.parse(dataToSubmit);
+
+      const formData = new FormData();
+      formData.append("title", dataToSubmit.title);
+      formData.append("content", dataToSubmit.content);
+      formData.append("summary", dataToSubmit.summary);
+      formData.append("authorId", dataToSubmit.authorId);
+      formData.append("categoryId", dataToSubmit.categoryId);
+      formData.append("tags", JSON.stringify(dataToSubmit.tags));
+      if (dataToSubmit.bannerImage instanceof Blob) {
+        formData.append("bannerImage", dataToSubmit.bannerImage);
+      }
+
+      const response = await createNews(token, dataToSubmit);
+      if (response.status === 201) {
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Berita ditambahkan",
+          life: 3000,
+        });
+        setVisible(false);
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      }
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModalUpdate = async () => {};
 
@@ -381,12 +323,12 @@ const NewsData = () => {
       canvas.toBlob(
         async (blob) => {
           if (blob) {
-            const file = new File([blob], "banner.jpg", {
+            const file = new File([blob], "bannerImage.jpg", {
               type: "image/jpeg",
             });
             setDatas((prev) => ({
               ...prev,
-              banner: file,
+              bannerImage: file,
             }));
             const previewUrl = URL.createObjectURL(blob);
             console.log(previewUrl);
@@ -433,9 +375,35 @@ const NewsData = () => {
   //     );
 
   const columns = [
-    { header: "Judul", field: "judul" },
-    { header: "Banner", field: "banner" },
+    { header: "Judul", field: "title" },
+    { header: "Penulis", field: "author.fullName" },
+    { header: "Kategori", field: "category.name" },
+    { header: "Status", field: "status" },
+    { header: "Tanggal Pembuatan", field: "createdAt" },
+    { header: "Banner", field: "bannerImage" },
   ];
+
+  const itemTemplateAuthor = (option) => {
+    return <div>{option.fullName}</div>;
+  };
+
+  const valueTemplateAuthor = (option) => {
+    if (option) {
+      return <div>{option.fullName}</div>;
+    }
+    return <span>Pilih Author</span>;
+  };
+
+  const itemTemplateCategory = (option) => {
+    return <div>{option.name}</div>;
+  };
+
+  const valueTemplateCategory = (option) => {
+    if (option) {
+      return <div>{option.name}</div>;
+    }
+    return <span>Pilih Kategori Berita</span>;
+  };
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
@@ -443,7 +411,6 @@ const NewsData = () => {
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
       />
-
       <div className="bg-white min-h-screen dark:bg-blackHover rounded-xl">
         <CustomTable
           columns={columns}
@@ -457,13 +424,35 @@ const NewsData = () => {
       <FormModal
         visible={visible}
         onHide={() => setVisible(false)}
-        title={isEditMode ? "Ubah Data Artikel" : "Tambah Data Artikel"}
+        title={isEditMode ? "Ubah Data Berita" : "Tambah Data Berita"}
         onSubmit={isEditMode ? handleUpdate : handleCreate}
         submitLabel={isEditMode ? "Edit" : "Simpan"}
         isLoading={loading}
       >
         <div className="flex flex-col gap-4">
+          {/* Pilih Author */}
+          <label>Pilih Author:</label>
+          <CustomDropdown
+            value={author.find((item) => item.id === datas.authorId) || null}
+            filter
+            options={author || []}
+            optionLabel="fullName"
+            itemTemplate={itemTemplateAuthor}
+            valueTemplate={valueTemplateAuthor}
+            placeholder="Pilih Author"
+            className="p-2 rounded"
+            onChange={(e) =>
+              setDatas((prev) => ({ ...prev, authorId: e.value.id }))
+            }
+          />
+          {errors.authorId && (
+            <small className="p-error">{errors.authorId}</small>
+          )}
+
           <div className="flex flex-col gap-2">
+            <label htmlFor="" className="-mb-3">
+              Pilih Gambar Banner:
+            </label>
             <input
               ref={fileInputRef}
               id="file-upload"
@@ -474,7 +463,7 @@ const NewsData = () => {
             />
             <label
               htmlFor="file-upload"
-              className="p-ripple cursor-pointer bg-mainGreen text-white dark:bg-extraLightGreen dark:text-black hover:bg-mainDarkGreen dark:hover:bg-lightGreen p-2 w-fit flex justify-center rounded-xl transition-all"
+              className="p-ripple cursor-pointer bg-blue-400 hover:bg-blue-300  text-white p-2 w-fit flex justify-center rounded-xl transition-all"
             >
               <Ripple />
               <ImageUp />
@@ -491,18 +480,92 @@ const NewsData = () => {
             )}
           </div>
 
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              placeholder="Judul Artikel"
-              className="p-2 border rounded-lg dark:bg-blackHover dark:border-[#2d2d2d] dark:text-white"
-            />
-            <textarea
-              placeholder="Konten Artikel"
-              className="p-2 border rounded-lg dark:bg-blackHover dark:border-[#2d2d2d] dark:text-white"
-              rows={4}
-            />
-          </div>
+          {/* Judul Artikel */}
+          <label>Judul Artikel:</label>
+          <InputText
+            type="text"
+            placeholder="Judul Artikel"
+            className="p-input text-lg p-3 rounded"
+            value={datas.title}
+            onChange={(e) =>
+              setDatas((prev) => ({ ...prev, title: e.target.value }))
+            }
+          />
+          {errors.title && <small className="p-error">{errors.title}</small>}
+
+          <label htmlFor="" className="-mb-3">
+            Ringkasan Artikel:
+          </label>
+
+          <InputTextarea
+            autoResize
+            type="text"
+            placeholder="Ringkasan Artikel"
+            className="p-input text-lg p-3  rounded"
+            value={datas.summary}
+            onChange={(e) =>
+              setDatas((prev) => ({
+                ...prev,
+                summary: e.target.value,
+              }))
+            }
+          />
+
+          {errors.summary && (
+            <small className="p-error -mt-3 text-sm">{errors.summary}</small>
+          )}
+
+          {/* Pilih Kategori */}
+          <label>Pilih Kategori Berita:</label>
+          <CustomDropdown
+            value={
+              category.find((item) => item.id === datas.categoryId) || null
+            }
+            filter
+            options={category || []}
+            optionLabel="name"
+            itemTemplate={itemTemplateCategory}
+            valueTemplate={valueTemplateCategory}
+            placeholder="Pilih Kategori"
+            className="p-2 rounded"
+            onChange={(e) =>
+              setDatas((prev) => ({
+                ...prev,
+                categoryId: Number(e.value.id),
+              }))
+            }
+          />
+
+          {errors.categoryId && (
+            <small className="p-error">{errors.categoryId}</small>
+          )}
+
+          {/* Konten Artikel */}
+          <label>Konten Artikel:</label>
+          <Editor
+            value={datas.content}
+            key={isEditMode ? `edit-${currentId}` : "create"}
+            placeholder="Konten Artikel"
+            headerTemplate={header}
+            onTextChange={(e) => handleTextChange(e.htmlValue || "")}
+            style={{ minHeight: "320px", maxHeight: "fit-content" }}
+          />
+          {errors.content && (
+            <small className="p-error">{errors.content}</small>
+          )}
+
+          {/* Input Tags */}
+          <label>Tags:</label>
+          <TagInput
+            tags={datas.tags}
+            setTags={(newTags) =>
+              setDatas((prev) => ({ ...prev, tags: newTags }))
+            }
+            onChange={(newTags) =>
+              setDatas((prev) => ({ ...prev, tags: newTags }))
+            }
+          />
+          {errors.tags && <small className="p-error">{errors.tags}</small>}
         </div>
       </FormModal>
 
