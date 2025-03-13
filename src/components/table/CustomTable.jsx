@@ -5,6 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { Search, Trash2, Edit, Plus } from "lucide-react";
+import { DateFormat } from "../../utils/DateFormat";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/uploads/images/`;
 
@@ -96,7 +97,21 @@ export default function CustomTable({
           />
         );
       } else {
-        return <p className="flex justify-center items-center"></p>;
+        return (
+          <p className="flex justify-center items-center">
+            Berita ini tidak memiliki banner
+          </p>
+        );
+      }
+    }
+
+    if (field.includes("createdAt")) {
+      if (valueString) {
+        return (
+          <p className="flex justify-center items-center">
+            {DateFormat(valueString)}
+          </p>
+        );
       }
     }
     return <span>{valueString}</span>;

@@ -23,13 +23,9 @@ export const getAllNews = async (token) => {
   }
 };
 
-export const getNewsById = async (token, id) => {
+export const getNewsById = async (id) => {
   try {
-    const response = await axios.get(`${API_BASE_URI}/api/article/${id}`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.get(`${API_BASE_URI}/api/article/${id}`);
     if (response.status === 200) {
       return response.data.data;
     }
@@ -55,8 +51,6 @@ export const createNews = async (token, newsData) => {
       console.warn("bannerImage is not a File object:", newsData.bannerImage);
     }
 
-    console.log("FormData sebelum dikirim:", formData);
-
     const response = await axios.post(`${API_BASE_URI}/api/article`, formData, {
       headers: {
         Authorization: token,
@@ -67,6 +61,40 @@ export const createNews = async (token, newsData) => {
     return response;
   } catch (error) {
     console.error("Error creating News:", error);
+    throw error;
+  }
+};
+
+export const updateNews = async (token, id, newsData) => {
+  try {
+    const formData = new FormData();
+    formData.append("title", newsData.title);
+    formData.append("content", newsData.content);
+    formData.append("summary", newsData.summary);
+    formData.append("authorId", newsData.authorId);
+    formData.append("categoryId", newsData.categoryId);
+    formData.append("tags", JSON.stringify(newsData.tags));
+
+    if (newsData.bannerImage instanceof File) {
+      formData.append("bannerImage", newsData.bannerImage);
+    } else {
+      console.warn("bannerImage is not a File object:", newsData.bannerImage);
+    }
+
+    const response = await axios.put(
+      `${API_BASE_URI}/api/article/${id}`,
+      formData,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error Updating News:", error);
     throw error;
   }
 };

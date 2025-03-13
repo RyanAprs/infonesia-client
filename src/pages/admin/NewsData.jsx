@@ -20,7 +20,12 @@ import ImageFormat from "../../utils/ImageFormat.js";
 import VideoBlot from "../../utils/VideoBlot.js";
 import { Editor } from "primereact/editor";
 import { getAllCategory } from "../../services/categoryService.js";
-import { createNews, getAllNews } from "../../services/ArticleService.js";
+import {
+  createNews,
+  getAllNews,
+  getNewsById,
+  updateNews,
+} from "../../services/ArticleService.js";
 import { NewsCreateSchemaAdmin } from "../../validations/NewsSchema.jsx";
 import { ZodError } from "zod";
 import TagInput from "../../components/tagInput/TagInput.jsx";
@@ -100,8 +105,6 @@ const NewsData = () => {
       const responseUser = await getAllUser(token, "JOURNALIST");
       const responseCategory = await getAllCategory(token);
 
-      console.log(responseCategory);
-
       setAuthor(responseUser);
       setCategory(responseCategory);
       setLoading(false);
@@ -159,9 +162,147 @@ const NewsData = () => {
     }
   };
 
-  const handleModalUpdate = async () => {};
+  const handleModalUpdate = async (data) => {
+    setErrors({});
+    setCroppedImage(null);
+    setSelectedImage(null);
+    if (cropperRef.current) {
+      cropperRef.current.destroy();
+      cropperRef.current = null;
+    }
+    setVisible(true);
 
-  const handleUpdate = async () => {};
+    try {
+      const responseUser = await getAllUser(token, "JOURNALIST");
+      const responseCategory = await getAllCategory(token);
+
+      setAuthor(responseUser);
+      setCategory(responseCategory);
+    } catch (error) {
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+        setVisible(false);
+      }
+    } finally {
+      setLoading(false);
+    }
+
+    try {
+      const dataResponse = await getNewsById(data.id);
+      if (dataResponse.content) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(dataResponse.content, "text/html");
+
+        doc.querySelectorAll("img").forEach((img) => {
+          if (!img.src.startsWith("data:") && !img.src.startsWith(baseUrl)) {
+            const imageName = img.src.split("/").pop();
+            img.src = baseUrl + imageName;
+          }
+        });
+
+        dataResponse.content = doc.body.innerHTML;
+      }
+
+      if (dataResponse) {
+        setDatas({
+          authorId: dataResponse.author.id,
+          title: dataResponse.title,
+          summary: dataResponse.summary,
+          content: dataResponse.content,
+          bannerImage: dataResponse.bannerImage,
+          categoryId: dataResponse.categoryId,
+          tags: dataResponse.tags.map((tag) => tag.name),
+        });
+
+        console.log(dataResponse);
+
+        editorContentRef.current = dataResponse.summary;
+        setCurrentId(data.id);
+        setIsEditMode(true);
+        setVisible(true);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      setLoading(true);
+      const dataToSubmit = {
+        ...datas,
+        content: editorContentRef.current,
+      };
+      NewsCreateSchemaAdmin.parse(dataToSubmit);
+      const clonedData = structuredClone(dataToSubmit);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(clonedData.content, "text/html");
+
+      doc.querySelectorAll("img").forEach((img) => {
+        if (!img.src.startsWith("data:")) {
+          const imageName = img.src.split("/").pop();
+          img.src = imageName;
+        }
+      });
+
+      clonedData.content = doc.body.innerHTML;
+
+      const response = await updateNews(token, currentId, clonedData);
+      if (response.status === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data artikel diperbarui",
+          life: 3000,
+        });
+        setVisible(false);
+        try {
+          setLoading(true);
+          const response = await getAllNews();
+          setData(response);
+          setLoading(false);
+          setisConnectionError(false);
+        } catch (error) {
+          if (
+            error.code === "ERR_NETWORK" ||
+            error.code === "ETIMEDOUT" ||
+            error.code === "ECONNABORTED" ||
+            error.code === "ENOTFOUND" ||
+            error.code === "ECONNREFUSED" ||
+            error.code === "EAI_AGAIN" ||
+            error.code === "EHOSTUNREACH" ||
+            error.code === "ECONNRESET" ||
+            error.code === "EPIPE"
+          ) {
+            setisConnectionError(true);
+          }
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModalDelete = async () => {};
 
@@ -361,7 +502,7 @@ const NewsData = () => {
 
   const header = renderHeader();
 
-  //   if (loading)
+  //   if (loadingPage)
   //     return (
   //       <div className="min-h-screen flex flex-col gap-4 p-4 z-10 ">
   //         <Toast
@@ -375,12 +516,13 @@ const NewsData = () => {
   //     );
 
   const columns = [
+    { header: "Banner", field: "bannerImage" },
     { header: "Judul", field: "title" },
     { header: "Penulis", field: "author.fullName" },
     { header: "Kategori", field: "category.name" },
-    { header: "Status", field: "status" },
+    { header: "Ringkasan", field: "summary" },
     { header: "Tanggal Pembuatan", field: "createdAt" },
-    { header: "Banner", field: "bannerImage" },
+    { header: "Status", field: "status" },
   ];
 
   const itemTemplateAuthor = (option) => {
@@ -405,6 +547,12 @@ const NewsData = () => {
     return <span>Pilih Kategori Berita</span>;
   };
 
+  const statuses = [
+    { key: "DRAFT", label: "Draft" },
+    { key: "PUBLISHED", label: "Published" },
+    { key: "ARCHIVED", label: "Archived" },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
       <Toast
@@ -418,6 +566,7 @@ const NewsData = () => {
           onCreate={handleModalCreate}
           onEdit={handleModalUpdate}
           onDelete={handleModalDelete}
+          statuses={statuses}
         />
       </div>
 
@@ -468,6 +617,16 @@ const NewsData = () => {
               <Ripple />
               <ImageUp />
             </label>
+
+            {!croppedImage && datas.bannerImage && isEditMode && (
+              <div>
+                <img
+                  src={`${baseUrl}${datas.bannerImage}`}
+                  alt="Banner"
+                  className={`w-full rounded border dark:border-[#2d2d2d]`}
+                />
+              </div>
+            )}
 
             {croppedImage && (
               <div className="mt-2">
