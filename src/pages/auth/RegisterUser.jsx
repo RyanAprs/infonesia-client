@@ -3,6 +3,8 @@ import UseAuthManager from "../../store/AuthProvider";
 import { useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { RegisterSchema } from "../../validations/AuthSchema";
+import { ZodError } from "zod";
 
 const RegisterUser = () => {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ const RegisterUser = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -20,10 +23,17 @@ const RegisterUser = () => {
         password,
         fullName: name,
       };
+      RegisterSchema.parse(data);
       await register(data);
       navigate("/login");
-    } catch (err) {
-      console.error("Register failed:", err);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      }
     }
   };
 
@@ -47,6 +57,10 @@ const RegisterUser = () => {
               onChange={(e) => setName(e.target.value)}
             />
 
+            {errors.fullName && (
+              <small className="p-error">{errors.fullName}</small>
+            )}
+
             <label htmlFor="" className="-mb-3">
               Email:
             </label>
@@ -58,6 +72,8 @@ const RegisterUser = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
 
+            {errors.email && <small className="p-error">{errors.email}</small>}
+
             <label htmlFor="" className="-mb-3">
               Password:
             </label>
@@ -68,6 +84,11 @@ const RegisterUser = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+
+            {errors.password && (
+              <small className="p-error">{errors.password}</small>
+            )}
+
             <div className="flex flex-col w-full gap-3">
               <Button
                 onClick={handleRegister}

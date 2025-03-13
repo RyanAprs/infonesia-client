@@ -26,19 +26,9 @@ export const RegisterSchema = z.object({
 });
 
 export const LoginSchema = z.object({
-  fullName: z
-    .string()
-    .max(50)
-    .refine((val) => val.trim().length > 0, "Nama tidak boleh kosong"),
   email: z
     .string()
     .nonempty("Email tidak boleh kosong")
     .email({ message: "Email tidak valid" }),
-  password: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || isPasswordFormat(val),
-      "Password tidak sesuai format (minimal 6 karakter, harus mengandung huruf besar, huruf kecil, angka, dan karakter spesial)"
-    ),
+  password: z.string().nonempty("Password tidak boleh kosong"),
 });
