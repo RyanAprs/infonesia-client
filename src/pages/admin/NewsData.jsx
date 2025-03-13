@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
 import Cropper from "cropperjs";
 import "/node_modules/cropperjs/dist/cropper.css";
 import Quill from "quill";
@@ -31,6 +30,8 @@ import { NewsCreateSchemaAdmin } from "../../validations/NewsSchema.jsx";
 import { ZodError } from "zod";
 import TagInput from "../../components/tagInput/TagInput.jsx";
 import { InputTextarea } from "primereact/inputtextarea";
+import LoadingPage from "../../components/Loading/LoadingPage.jsx";
+import ErrorConnection from "../../components/errorConnection/errorConnection.jsx";
 const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/uploads/images/`;
 
 const NewsData = () => {
@@ -53,15 +54,13 @@ const NewsData = () => {
   const [currentName, setCurrentName] = useState("");
   const [errors, setErrors] = useState({});
   const toast = useRef(null);
-  const navigate = useNavigate();
   const [isConnectionError, setisConnectionError] = useState(false);
-  const [isButtonLoading, setIsButtonLoading] = useState(null);
+  const [loadingPage, setLoadingPage] = useState(false);
   const [author, setAuthor] = useState([]);
   const [category, setCategory] = useState([]);
   const [visibleCropImage, setVisibleCropImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [croppedImage, setCroppedImage] = useState(null);
-  const [tagList, setTagList] = useState([]);
   const imageRef = useRef(null);
   const cropperRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -81,10 +80,29 @@ const NewsData = () => {
   Quill.register(VideoBlot);
 
   const fetchData = async () => {
-    const response = await getAllNews(token);
-    console.log(response);
+    try {
+      setLoadingPage(true);
+      const response = await getAllNews(token);
 
-    setData(response);
+      setData(response);
+    } catch (error) {
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
+      setisConnectionError(false);
+    }
   };
 
   useEffect(() => {
@@ -147,6 +165,7 @@ const NewsData = () => {
           detail: "Data Berita ditambahkan",
           life: 3000,
         });
+        fetchData();
         setVisible(false);
       }
     } catch (error) {
@@ -269,28 +288,7 @@ const NewsData = () => {
           life: 3000,
         });
         setVisible(false);
-        try {
-          setLoading(true);
-          const response = await getAllNews();
-          setData(response);
-          setLoading(false);
-          setisConnectionError(false);
-        } catch (error) {
-          if (
-            error.code === "ERR_NETWORK" ||
-            error.code === "ETIMEDOUT" ||
-            error.code === "ECONNABORTED" ||
-            error.code === "ENOTFOUND" ||
-            error.code === "ECONNREFUSED" ||
-            error.code === "EAI_AGAIN" ||
-            error.code === "EHOSTUNREACH" ||
-            error.code === "ECONNRESET" ||
-            error.code === "EPIPE"
-          ) {
-            setisConnectionError(true);
-          }
-          setLoading(false);
-        }
+        fetchData();
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -299,6 +297,19 @@ const NewsData = () => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+        setVisible(false);
       }
     } finally {
       setLoading(false);
@@ -323,31 +334,23 @@ const NewsData = () => {
           detail: "Data Berita dihapus",
           life: 3000,
         });
-        try {
-          setLoading(true);
-          const response = await getAllNews();
-          setData(response);
-          setLoading(false);
-          setisConnectionError(false);
-        } catch (error) {
-          if (
-            error.code === "ERR_NETWORK" ||
-            error.code === "ETIMEDOUT" ||
-            error.code === "ECONNABORTED" ||
-            error.code === "ENOTFOUND" ||
-            error.code === "ECONNREFUSED" ||
-            error.code === "EAI_AGAIN" ||
-            error.code === "EHOSTUNREACH" ||
-            error.code === "ECONNRESET" ||
-            error.code === "EPIPE"
-          ) {
-            setisConnectionError(true);
-          }
-          setLoading(false);
-        }
+        fetchData();
       }
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+        setVisible(false);
+      }
     } finally {
       setLoading(false);
     }
@@ -547,19 +550,6 @@ const NewsData = () => {
 
   const header = renderHeader();
 
-  //   if (loadingPage)
-  //     return (
-  //       <div className="min-h-screen flex flex-col gap-4 p-4 z-10 ">
-  //         <Toast
-  //           ref={toast}
-  //           position={window.innerWidth <= 767 ? "top-center" : "top-right"}
-  //         />
-  //         <div className="bg-white min-h-screen dark:bg-blackHover p-4 rounded-xl flex items-center justify-center">
-  //           <ProgressSpinner />
-  //         </div>
-  //       </div>
-  //     );
-
   const columns = [
     { header: "Banner", field: "bannerImage" },
     { header: "Judul", field: "title" },
@@ -597,6 +587,11 @@ const NewsData = () => {
     { key: "PUBLISHED", label: "Published" },
     { key: "ARCHIVED", label: "Archived" },
   ];
+
+  if (loadingPage) return <LoadingPage />;
+  if (isConnectionError) {
+    return <ErrorConnection fetchData={fetchData} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
