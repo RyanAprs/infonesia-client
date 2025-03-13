@@ -3,24 +3,17 @@ import axios from "axios";
 const API_BASE_URI = import.meta.env.VITE_API_BASE_URI;
 
 export const getAllCategory = async (token) => {
-  try {
-    const response = await axios.get(`${API_BASE_URI}/api/category`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+  const response = await axios.get(`${API_BASE_URI}/api/category`, {
+    headers: {
+      Authorization: token,
+    },
+  });
 
-    if (!response.data || !response.data.data) {
-      return [];
-    }
-
-    if (response.status === 200) {
-      return response.data.data;
-    }
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    throw error;
+  if (!response.data || !response.data.data) {
+    return [];
   }
+
+  return response.data.data;
 };
 
 export const getCategoryById = async (token, id) => {

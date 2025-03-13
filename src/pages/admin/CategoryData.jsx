@@ -11,6 +11,8 @@ import { InputText } from "primereact/inputtext";
 import FormModal from "../../components/modal/FormModal";
 import CustomTable from "../../components/table/customTable";
 import { Toast } from "primereact/toast";
+import LoadingPage from "../../components/Loading/LoadingPage";
+import ErrorConnection from "../../components/errorConnection/errorConnection";
 
 const CategoryData = () => {
   const { token } = UseAuthManager();
@@ -26,6 +28,8 @@ const CategoryData = () => {
     useState(false);
   const [isdeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const toast = useRef(null);
+  const [isConnectionError, setisConnectionError] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
 
   const columns = [
     { field: "name", header: "Nama Kategori" },
@@ -33,8 +37,28 @@ const CategoryData = () => {
   ];
 
   const fetchCategory = async () => {
-    const response = await getAllCategory(token);
-    setData(response);
+    try {
+      setLoadingPage(true);
+      const response = await getAllCategory(token);
+      setData(response);
+      setisConnectionError(false);
+    } catch (error) {
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   useEffect(() => {
@@ -59,7 +83,22 @@ const CategoryData = () => {
         name: response.name,
       });
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -97,9 +136,22 @@ const CategoryData = () => {
         setIsCreateAndUpdateModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response.status);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -130,9 +182,22 @@ const CategoryData = () => {
         setIsCreateAndUpdateModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response.status);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -151,11 +216,32 @@ const CategoryData = () => {
         setIsDeleteModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
+
+  if (isConnectionError) {
+    return <ErrorConnection fetchData={fetchCategory} />;
+  }
+
+  if (loadingPage) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">

@@ -85,6 +85,7 @@ const NewsData = () => {
       const response = await getAllNews(token);
 
       setData(response);
+      setisConnectionError(false);
     } catch (error) {
       if (
         error.code === "ERR_NETWORK" ||
@@ -101,7 +102,6 @@ const NewsData = () => {
       }
     } finally {
       setLoadingPage(false);
-      setisConnectionError(false);
     }
   };
 
@@ -120,6 +120,16 @@ const NewsData = () => {
     setVisible(true);
     setIsEditMode(false);
 
+    setDatas({
+      title: "",
+      authorId: "",
+      bannerImage: "",
+      categoryId: 0,
+      content: "",
+      summary: "",
+      tags: [],
+    });
+
     try {
       const responseUser = await getAllUser(token, "JOURNALIST");
       const responseCategory = await getAllCategory(token);
@@ -128,7 +138,19 @@ const NewsData = () => {
       setCategory(responseCategory);
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -588,10 +610,11 @@ const NewsData = () => {
     { key: "ARCHIVED", label: "Archived" },
   ];
 
-  if (loadingPage) return <LoadingPage />;
   if (isConnectionError) {
     return <ErrorConnection fetchData={fetchData} />;
   }
+
+  if (loadingPage) return <LoadingPage />;
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">

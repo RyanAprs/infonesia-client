@@ -11,6 +11,8 @@ import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
 import FormModal from "../../components/modal/FormModal";
 import { Toast } from "primereact/toast";
+import LoadingPage from "../../components/Loading/LoadingPage";
+import ErrorConnection from "../../components/errorConnection/errorConnection";
 
 const JournalistData = () => {
   const { token } = UseAuthManager();
@@ -21,6 +23,8 @@ const JournalistData = () => {
   const [currentId, setCurrentId] = useState("");
   const [currentEmail, setCurrentEmail] = useState("");
   const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [isConnectionError, setisConnectionError] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
   const [JournalistData, setJournalistData] = useState({
     fullName: "",
     email: "",
@@ -37,9 +41,33 @@ const JournalistData = () => {
   ];
 
   const fetchJournalist = async () => {
-    const response = await getAllUser(token, role);
-    setData(response);
+    try {
+      setLoadingPage(true);
+      const response = await getAllUser(token, role);
+      setData(response);
+      setisConnectionError(false);
+    } catch (error) {
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
+    }
   };
+
+  useEffect(() => {
+    fetchJournalist();
+  }, []);
 
   const handleCreateModalOpen = () => {
     setJournalistData({
@@ -63,7 +91,22 @@ const JournalistData = () => {
         password: "",
       });
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -114,9 +157,22 @@ const JournalistData = () => {
           detail: "Email sudah terdaftar, gunakan email yang lain!",
           life: 3000,
         });
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
       }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -157,9 +213,22 @@ const JournalistData = () => {
           detail: "Email sudah terdaftar, gunakan email yang lain!",
           life: 3000,
         });
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
       }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
 
@@ -178,15 +247,32 @@ const JournalistData = () => {
         setIsDeleteModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
     } finally {
       setLoading(false);
+      setisConnectionError(false);
     }
   };
 
-  useEffect(() => {
-    fetchJournalist();
-  }, []);
+  if (isConnectionError) {
+    return <ErrorConnection fetchData={fetchJournalist} />;
+  }
+
+  if (loadingPage) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 z-10">
