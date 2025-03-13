@@ -13,6 +13,8 @@ import CustomTable from "../../components/table/customTable";
 import { Toast } from "primereact/toast";
 import LoadingPage from "../../components/Loading/LoadingPage";
 import ErrorConnection from "../../components/errorConnection/errorConnection";
+import { ZodError } from "zod";
+import { CategorySchema } from "../../validations/CategorySchema";
 
 const CategoryData = () => {
   const { token } = UseAuthManager();
@@ -23,7 +25,7 @@ const CategoryData = () => {
     name: "",
   });
   const [currentId, setCurrentId] = useState();
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState("");
   const [isCreateAndUpdateModalOpen, setIsCreateAndUpdateModalOpen] =
     useState(false);
   const [isdeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -110,20 +112,14 @@ const CategoryData = () => {
   const handleCreateCategory = async () => {
     setLoading(true);
 
-    if (!categoryData.name) {
-      setError("input tidak boleh kosong");
-      setLoading(false);
-      return;
-    }
-
     try {
       const data = {
         name: categoryData.name,
       };
 
-      const response = await createCategory(token, data);
+      CategorySchema.parse(data);
 
-      console.log(response);
+      const response = await createCategory(token, data);
 
       if (response.status === 201) {
         toast.current.show({
@@ -136,7 +132,13 @@ const CategoryData = () => {
         setIsCreateAndUpdateModalOpen(false);
       }
     } catch (error) {
-      if (
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (
         error.code === "ERR_NETWORK" ||
         error.code === "ETIMEDOUT" ||
         error.code === "ECONNABORTED" ||
@@ -158,16 +160,12 @@ const CategoryData = () => {
   const handleUpdateCategory = async () => {
     setLoading(true);
 
-    if (!categoryData.name) {
-      setError("input tidak boleh kosong");
-      setLoading(false);
-      return;
-    }
-
     try {
       const data = {
         name: categoryData.name,
       };
+
+      CategorySchema.parse(data);
 
       const response = await updateCategory(token, currentId, data);
 
@@ -216,7 +214,13 @@ const CategoryData = () => {
         setIsDeleteModalOpen(false);
       }
     } catch (error) {
-      if (
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (
         error.code === "ERR_NETWORK" ||
         error.code === "ETIMEDOUT" ||
         error.code === "ECONNABORTED" ||
@@ -281,8 +285,7 @@ const CategoryData = () => {
                 }))
               }
             />
-
-            {error && <span className="text-red-500">{error}</span>}
+            {errors.name && <small className="p-error">{errors.name}</small>}
           </div>
         </div>
       </FormModal>

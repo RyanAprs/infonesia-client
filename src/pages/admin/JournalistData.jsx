@@ -13,13 +13,18 @@ import FormModal from "../../components/modal/FormModal";
 import { Toast } from "primereact/toast";
 import LoadingPage from "../../components/Loading/LoadingPage";
 import ErrorConnection from "../../components/errorConnection/errorConnection";
+import {
+  UserCreateSchema,
+  UserUpdateSchema,
+} from "../../validations/UserSchema";
+import { ZodError } from "zod";
 
 const JournalistData = () => {
   const { token } = UseAuthManager();
   const role = "JOURNALIST";
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState("");
   const [currentId, setCurrentId] = useState("");
   const [currentEmail, setCurrentEmail] = useState("");
   const [isUpdateMode, setIsUpdateMode] = useState(false);
@@ -119,22 +124,14 @@ const JournalistData = () => {
   const handleCreateJournalist = async () => {
     setLoading(true);
 
-    if (
-      !JournalistData.fullName ||
-      !JournalistData.email ||
-      !JournalistData.password
-    ) {
-      setError("input tidak boleh kosong");
-      setLoading(false);
-      return;
-    }
-
     try {
       const data = {
         fullName: JournalistData.fullName,
         email: JournalistData.email,
         password: JournalistData.password,
       };
+
+      UserCreateSchema.parse(data);
 
       const response = await createJournalist(token, data);
 
@@ -149,8 +146,13 @@ const JournalistData = () => {
         setIsCreateAndUpdateModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response.status);
-      if (error.response.status === 409) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (error.response.status === 409) {
         toast.current.show({
           severity: "error",
           summary: "Gagal",
@@ -179,18 +181,14 @@ const JournalistData = () => {
   const handleUpdateJournalist = async () => {
     setLoading(true);
 
-    if (!JournalistData.fullName || !JournalistData.email) {
-      setError("input tidak boleh kosong");
-      setLoading(false);
-      return;
-    }
-
     try {
       const data = {
         fullName: JournalistData.fullName,
         email: JournalistData.email,
         password: JournalistData.password,
       };
+
+      UserUpdateSchema.parse(data);
 
       const response = await updateUser(token, currentId, data);
 
@@ -205,8 +203,13 @@ const JournalistData = () => {
         setIsCreateAndUpdateModalOpen(false);
       }
     } catch (error) {
-      console.log(error.response.status);
-      if (error.response.status === 422) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (error.response.status === 409) {
         toast.current.show({
           severity: "error",
           summary: "Gagal",
@@ -315,6 +318,10 @@ const JournalistData = () => {
               }
             />
 
+            {errors.fullName && (
+              <small className="p-error">{errors.fullName}</small>
+            )}
+
             <label htmlFor="" className="-mb-3">
               Email:
             </label>
@@ -330,6 +337,8 @@ const JournalistData = () => {
                 }))
               }
             />
+
+            {errors.email && <small className="p-error">{errors.email}</small>}
 
             <label htmlFor="" className="-mb-3">
               Password:
@@ -352,7 +361,9 @@ const JournalistData = () => {
                 : null}
             </span>
 
-            {error && <span className="text-red-500">{error}</span>}
+            {errors.password && (
+              <small className="p-error">{errors.password}</small>
+            )}
           </div>
         </div>
       </FormModal>
