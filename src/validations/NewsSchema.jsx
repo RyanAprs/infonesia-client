@@ -28,6 +28,12 @@ export const NewsCreateSchemaAdmin = z.object({
           "Konten berita tidak boleh lebih dari 50MB hapus beberapa gambar baru",
       }
     ),
+  status: z
+    .string()
+    .refine(
+      (val) => ["DRAFT", "PUBLISHED", "ARCHIVED"].includes(val),
+      "Pilih status berita yang sesuai"
+    ),
   authorId: z
     .string()
     .nullable()

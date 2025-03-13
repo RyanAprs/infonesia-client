@@ -290,8 +290,6 @@ const NewsData = () => {
         content: editorContentRef.current,
       };
 
-      console.log(dataToSubmit);
-
       NewsCreateSchemaAdmin.parse(dataToSubmit);
       const clonedData = structuredClone(dataToSubmit);
       const parser = new DOMParser();
@@ -740,9 +738,7 @@ const NewsData = () => {
               setDatas((prev) => ({ ...prev, status: e.value.key }))
             }
           />
-          {errors.authorId && (
-            <small className="p-error">{errors.authorId}</small>
-          )}
+          {errors.status && <small className="p-error">{errors.status}</small>}
 
           <label htmlFor="" className="-mb-3">
             Ringkasan Artikel:
