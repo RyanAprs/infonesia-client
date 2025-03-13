@@ -98,3 +98,19 @@ export const updateNews = async (token, id, newsData) => {
     throw error;
   }
 };
+
+export const deleteNews = async (token, id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URI}/api/article/${id}`, {
+      headers: {
+        Authorization: token,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error Updating News:", error);
+    throw error;
+  }
+};

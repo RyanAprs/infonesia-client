@@ -22,6 +22,7 @@ import { Editor } from "primereact/editor";
 import { getAllCategory } from "../../services/categoryService.js";
 import {
   createNews,
+  deleteNews,
   getAllNews,
   getNewsById,
   updateNews,
@@ -264,7 +265,7 @@ const NewsData = () => {
         toast.current.show({
           severity: "success",
           summary: "Berhasil",
-          detail: "Data artikel diperbarui",
+          detail: "Data berita diperbarui",
           life: 3000,
         });
         setVisible(false);
@@ -304,9 +305,53 @@ const NewsData = () => {
     }
   };
 
-  const handleModalDelete = async () => {};
+  const handleModalDelete = async (data) => {
+    setCurrentId(data.id);
+    setCurrentName(data.title);
+    setVisibleDelete(true);
+  };
 
-  const handleDelete = async () => {};
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+      const response = await deleteNews(token, currentId);
+      if (response.status === 200) {
+        setVisibleDelete(false);
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data Berita dihapus",
+          life: 3000,
+        });
+        try {
+          setLoading(true);
+          const response = await getAllNews();
+          setData(response);
+          setLoading(false);
+          setisConnectionError(false);
+        } catch (error) {
+          if (
+            error.code === "ERR_NETWORK" ||
+            error.code === "ETIMEDOUT" ||
+            error.code === "ECONNABORTED" ||
+            error.code === "ENOTFOUND" ||
+            error.code === "ECONNREFUSED" ||
+            error.code === "EAI_AGAIN" ||
+            error.code === "EHOSTUNREACH" ||
+            error.code === "ECONNRESET" ||
+            error.code === "EPIPE"
+          ) {
+            setisConnectionError(true);
+          }
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderHeader = () => {
     return (
@@ -725,6 +770,22 @@ const NewsData = () => {
             }
           />
           {errors.tags && <small className="p-error">{errors.tags}</small>}
+        </div>
+      </FormModal>
+
+      <FormModal
+        visible={visibleDelete}
+        onHide={() => setVisibleDelete(false)}
+        title={"Hapus Data Berita"}
+        onSubmit={handleDelete}
+        submitLabel="Hapus"
+        isLoading={loading}
+      >
+        <div className="flex flex-col gap-8">
+          <div className="text-xl">
+            Apakah anda yakin ingin menghapus data artikel dengan judul{" "}
+            {currentName}?
+          </div>
         </div>
       </FormModal>
 
