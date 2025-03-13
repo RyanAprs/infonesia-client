@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import UseAuthManager from "../../store/AuthProvider";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { RegisterSchema } from "../../validations/AuthSchema";
 import { ZodError } from "zod";
+import { Toast } from "primereact/toast";
 
 const RegisterUser = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const RegisterUser = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const toast = useRef(null);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -33,6 +35,13 @@ const RegisterUser = () => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
+      } else if (error.response.status === 409) {
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar!",
+          life: 3000,
+        });
       }
     }
   };
@@ -40,6 +49,10 @@ const RegisterUser = () => {
   return (
     <>
       <div className="min-h-screen w-full flex justify-center items-center md:p-8 p-8">
+        <Toast
+          ref={toast}
+          position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+        />{" "}
         <div className="flex justify-center items-center w-full md:w-1/2 flex-col gap-4">
           <div className="flex justify-center items-center flex-col w-full">
             <h1 className="text-3xl font-semibold">Register </h1>
