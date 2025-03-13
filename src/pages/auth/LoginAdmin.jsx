@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import UseAuthManager from "../../store/AuthProvider";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { LoginSchema } from "../../validations/AuthSchema";
 import { ZodError } from "zod";
+import { Toast } from "primereact/toast";
 
 const LoginAdmin = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const LoginAdmin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const toast = useRef(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,6 +33,13 @@ const LoginAdmin = () => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
+      } else if (error.response.status === 401) {
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email atau password salah!",
+          life: 3000,
+        });
       }
     }
   };
@@ -38,6 +47,10 @@ const LoginAdmin = () => {
   return (
     <>
       <div className="min-h-screen w-full flex justify-center items-center md:p-8 p-8">
+        <Toast
+          ref={toast}
+          position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+        />{" "}
         <div className="flex justify-center items-center w-full md:w-1/2 flex-col gap-4">
           <div className="flex justify-center items-center flex-col w-full">
             <h1 className="text-3xl font-semibold">Masuk </h1>
