@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import {
   ChevronDown,
@@ -12,15 +12,27 @@ import UseAuthManager from "../../store/AuthProvider";
 import { getRole } from "../ProtectedRoute/ProtectedRoute";
 import { useNavigate } from "react-router-dom";
 import FormModal from "../modal/FormModal";
+import {
+  UpdatePasswordSchema,
+  UpdateProfileSchema,
+} from "../../validations/ProfileSchema";
+import { ZodError } from "zod";
+import {
+  getCurrentUser,
+  updateCurrentPasswored,
+  updateCurrentUser,
+} from "../../services/ProfileService";
+import { jwtDecode } from "jwt-decode";
+import { Toast } from "primereact/toast";
 
 const DropDown = () => {
-  const { logout, token, checkProfile } = UseAuthManager();
+  const { logout, token } = UseAuthManager();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isUpdateProfileModalOpen, setIsUpdateProfileModalOpen] =
     useState(false);
-  const [isButtonLoading, setButtonLoading] = useState(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [loading, setLoading] = useState(null);
   const navigate = useNavigate();
   const [dataPassword, setDataPassword] = useState({
     currentPassword: "",
@@ -32,16 +44,21 @@ const DropDown = () => {
     fullName: "",
     email: "",
   });
+  const toast = useRef(null);
+
+  const data = jwtDecode(token);
 
   const getProfileData = async () => {
-    const response = await checkProfile();
+    try {
+      const response = await getCurrentUser(token);
 
-    setDataProfile({
-      fullName: response.fullName,
-      email: response.email,
-    });
-
-    console.log(response.email);
+      setDataProfile({
+        fullName: response.fullName,
+        email: response.email,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -49,77 +66,86 @@ const DropDown = () => {
   }, []);
 
   const handleUpdateProfile = async () => {
-    //   try {
-    //     const updatedDatas = {
-    //       ...dataProfile,
-    //       fullName: dataProfile.fullName,
-    //       email: dataProfile.email,
-    //     };
-    //     puskesmasUpdateCurrentSchema.parse(updatedDatas);
-    //     const response = await updateCurrentPuskesmas(updatedDatas);
-    //     if (response.status === 200) {
-    //       toast.current.show({
-    //         severity: "success",
-    //         summary: "Berhasil",
-    //         detail: "Data Anda diperbarui",
-    //         life: 3000,
-    //       });
-    //       setButtonLoading(false);
-    //       setIsUpdated(true);
-    //       setVisibleUpdateProfile(false);
-    //     }
-    //   } catch (error) {
-    //     setButtonLoading(false);
-    //     if (error instanceof ZodError) {
-    //       const newErrors = {};
-    //       error.errors.forEach((e) => {
-    //         newErrors[e.path[0]] = e.message;
-    //       });
-    //       setErrors(newErrors);
-    //     } else if (error.response && error.response.status === 409) {
-    //       handleApiError(error, toast);
-    //     } else {
-    //       if (isApotekUpdate) {
-    //         HandleUnauthorizedAdminApotek(error.response, dispatch, navigate);
-    //       } else {
-    //         HandleUnauthorizedAdminPuskesmas(error.response, dispatch, navigate);
-    //       }
-    //       handleApiError(error, toast);
-    //       setVisibleUpdateProfile(false);
-    //     }
-    //   }
+    setErrors({});
+    try {
+      setLoading(true);
+      UpdateProfileSchema.parse(dataProfile);
+      const response = await updateCurrentUser(token, data.id, dataProfile);
+
+      if (response.status_code === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Data profil diperbarui",
+          life: 3000,
+        });
+        setIsUpdateProfileModalOpen(false);
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setErrors(error.formErrors.fieldErrors);
+      } else if (error.response.status === 422) {
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Email sudah terdaftar, gunakan email yang lain!",
+          life: 3000,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChangePassword = async () => {
-    // try {
-    //   setButtonLoading(true);
-    //   superAdminChangePasswordSchema.parse(dataPassword);
-    //   response = await updatePassword(dataPassword);
-    //   if (response && response.status === 200) {
-    //     toast.current.show({
-    //       severity: "success",
-    //       summary: "Berhasil",
-    //       detail: "Password Anda diperbarui",
-    //       life: 3000,
-    //     });
-    //     setVisibleChangePassword(false);
-    //     setButtonLoading(false);
-    //   }
-    // } catch (error) {
-    //   setButtonLoading(false);
-    //   if (error instanceof ZodError) {
-    //     const newErrors = {};
-    //     error.errors.forEach((e) => {
-    //       newErrors[e.path[0]] = e.message;
-    //     });
-    //     setErrors(newErrors);
-    //   } else if (error.response && error.response.status === 401) {
-    //     handleChangePasswordError(error, toast);
-    //   } else {
-    //     setVisibleChangePassword(false);
-    //     handleChangePasswordError(error, toast);
-    //   }
-    // }
+    setErrors({});
+    try {
+      setLoading(true);
+      UpdatePasswordSchema.parse(dataPassword);
+
+      const passwordData = {
+        oldPassword: dataPassword.currentPassword,
+        newPassword: dataPassword.newPassword,
+      };
+
+      const response = await updateCurrentPasswored(
+        token,
+        data.id,
+        passwordData
+      );
+
+      if (response && response.status_code === 200) {
+        toast.current.show({
+          severity: "success",
+          summary: "Berhasil",
+          detail: "Password Anda diperbarui",
+          life: 3000,
+        });
+        setIsPasswordModalOpen(false);
+        setDataPassword({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (error.response.status === 400) {
+        toast.current.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Password lama anda salah",
+          life: 3000,
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOpenUpdateModal = () => {
@@ -153,6 +179,15 @@ const DropDown = () => {
     }, 100);
   };
 
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    setDataPassword({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
   const menuSections = [
     {
       items: [
@@ -183,6 +218,10 @@ const DropDown = () => {
 
   return (
     <>
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+      />
       <Menu as="div" className="relative inline-block text-left ">
         <>
           <Menu.Button
@@ -266,9 +305,10 @@ const DropDown = () => {
 
       <FormModal
         visible={isPasswordModalOpen}
-        onHide={() => setIsPasswordModalOpen(false)}
+        onHide={handleClosePasswordModal}
         title={"Ubah Password"}
         submitLabel="Simpan"
+        isLoading={loading}
         onSubmit={handleChangePassword}
       >
         <div className="flex flex-col gap-4">
@@ -289,6 +329,12 @@ const DropDown = () => {
               }
             />
 
+            {errors.currentPassword && (
+              <small className="p-error -mt-3 text-sm">
+                {errors.currentPassword}
+              </small>
+            )}
+
             <label htmlFor="" className="-mb-3">
               New Password:
             </label>
@@ -304,6 +350,12 @@ const DropDown = () => {
                 }))
               }
             />
+
+            {errors.newPassword && (
+              <small className="p-error -mt-3 text-sm">
+                {errors.newPassword}
+              </small>
+            )}
 
             <label htmlFor="" className="-mb-3">
               Confirm Password:
@@ -334,6 +386,7 @@ const DropDown = () => {
         onHide={handleCloseUpdateModal}
         title={"Ubah Profile"}
         submitLabel="Simpan"
+        isLoading={loading}
         onSubmit={handleUpdateProfile}
       >
         <div className="flex flex-col gap-4">
@@ -354,6 +407,10 @@ const DropDown = () => {
               }
             />
 
+            {errors.fullName && (
+              <small className="p-error">{errors.fullName}</small>
+            )}
+
             <label htmlFor="" className="-mb-3">
               Email:
             </label>
@@ -369,6 +426,7 @@ const DropDown = () => {
                 }))
               }
             />
+            {errors.email && <small className="p-error">{errors.email}</small>}
           </div>
         </div>
       </FormModal>

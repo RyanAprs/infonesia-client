@@ -116,16 +116,19 @@ const UseAuthManager = create(
         set({ loading: true, error: null });
 
         try {
-          const response = await fetch("https://your-api.com/auth/profile", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(userData),
-          });
+          const response = await axios.put(
+            `${API_BASE_URI}/api/user/current`,
+            userData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-          const data = await response.json();
+          console.log(response);
+
+          const data = response.data;
 
           if (!response.ok) {
             throw new Error(data.message || "Update failed");
