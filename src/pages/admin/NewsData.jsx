@@ -46,6 +46,7 @@ const NewsData = () => {
     summary: "",
     bannerImage: "",
     authorId: "",
+    status: "",
     categoryId: 0,
     tags: [],
   });
@@ -127,6 +128,7 @@ const NewsData = () => {
       categoryId: 0,
       content: "",
       summary: "",
+      status: "",
       tags: [],
     });
 
@@ -172,6 +174,7 @@ const NewsData = () => {
       formData.append("title", dataToSubmit.title);
       formData.append("content", dataToSubmit.content);
       formData.append("summary", dataToSubmit.summary);
+      formData.append("status", dataToSubmit.status);
       formData.append("authorId", dataToSubmit.authorId);
       formData.append("categoryId", dataToSubmit.categoryId);
       formData.append("tags", JSON.stringify(dataToSubmit.tags));
@@ -260,13 +263,12 @@ const NewsData = () => {
           authorId: dataResponse.author.id,
           title: dataResponse.title,
           summary: dataResponse.summary,
+          status: dataResponse.status,
           content: dataResponse.content,
           bannerImage: dataResponse.bannerImage,
           categoryId: dataResponse.categoryId,
           tags: dataResponse.tags.map((tag) => tag.name),
         });
-
-        console.log(dataResponse);
 
         editorContentRef.current = dataResponse.summary;
         setCurrentId(data.id);
@@ -287,6 +289,9 @@ const NewsData = () => {
         ...datas,
         content: editorContentRef.current,
       };
+
+      console.log(dataToSubmit);
+
       NewsCreateSchemaAdmin.parse(dataToSubmit);
       const clonedData = structuredClone(dataToSubmit);
       const parser = new DOMParser();
@@ -610,6 +615,12 @@ const NewsData = () => {
     { key: "ARCHIVED", label: "Archived" },
   ];
 
+  const statusBerita = [
+    { key: "DRAFT", label: "Draft" },
+    { key: "PUBLISHED", label: "Published" },
+    { key: "ARCHIVED", label: "Archived" },
+  ];
+
   if (isConnectionError) {
     return <ErrorConnection fetchData={fetchData} />;
   }
@@ -714,6 +725,24 @@ const NewsData = () => {
             }
           />
           {errors.title && <small className="p-error">{errors.title}</small>}
+
+          <label>Pilih Status Berita:</label>
+          <CustomDropdown
+            value={
+              statusBerita.find((item) => item.key === datas.status) || null
+            }
+            filter
+            options={statusBerita || []}
+            optionLabel="label"
+            placeholder="Pilih Status Berita"
+            className="p-2 rounded"
+            onChange={(e) =>
+              setDatas((prev) => ({ ...prev, status: e.value.key }))
+            }
+          />
+          {errors.authorId && (
+            <small className="p-error">{errors.authorId}</small>
+          )}
 
           <label htmlFor="" className="-mb-3">
             Ringkasan Artikel:

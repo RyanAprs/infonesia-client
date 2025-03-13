@@ -82,6 +82,7 @@ const UseAuthManager = create(
           token: null,
           isAuthenticated: false,
           error: null,
+          loading: false,
         });
       },
 

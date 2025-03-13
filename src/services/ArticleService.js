@@ -41,6 +41,7 @@ export const createNews = async (token, newsData) => {
     formData.append("title", newsData.title);
     formData.append("content", newsData.content);
     formData.append("summary", newsData.summary);
+    formData.append("status", newsData.status);
     formData.append("authorId", newsData.authorId);
     formData.append("categoryId", newsData.categoryId);
     formData.append("tags", JSON.stringify(newsData.tags));
@@ -71,6 +72,7 @@ export const updateNews = async (token, id, newsData) => {
     formData.append("title", newsData.title);
     formData.append("content", newsData.content);
     formData.append("summary", newsData.summary);
+    formData.append("status", newsData.status);
     formData.append("authorId", newsData.authorId);
     formData.append("categoryId", newsData.categoryId);
     formData.append("tags", JSON.stringify(newsData.tags));
