@@ -184,14 +184,16 @@ const NewsData = () => {
 
       const response = await createNews(token, dataToSubmit);
       if (response.status === 201) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Berita ditambahkan",
-          life: 3000,
-        });
         fetchData();
         setVisible(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Berita ditambahkan",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -306,14 +308,16 @@ const NewsData = () => {
 
       const response = await updateNews(token, currentId, clonedData);
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data berita diperbarui",
-          life: 3000,
-        });
         setVisible(false);
         fetchData();
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data berita diperbarui",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -353,13 +357,15 @@ const NewsData = () => {
       const response = await deleteNews(token, currentId);
       if (response.status === 200) {
         setVisibleDelete(false);
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Berita dihapus",
-          life: 3000,
-        });
         fetchData();
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Berita dihapus",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (
@@ -724,21 +730,28 @@ const NewsData = () => {
           />
           {errors.title && <small className="p-error">{errors.title}</small>}
 
-          <label>Pilih Status Berita:</label>
-          <CustomDropdown
-            value={
-              statusBerita.find((item) => item.key === datas.status) || null
-            }
-            filter
-            options={statusBerita || []}
-            optionLabel="label"
-            placeholder="Pilih Status Berita"
-            className="p-2 rounded"
-            onChange={(e) =>
-              setDatas((prev) => ({ ...prev, status: e.value.key }))
-            }
-          />
-          {errors.status && <small className="p-error">{errors.status}</small>}
+          {/* Status */}
+          {isEditMode && (
+            <>
+              <label>Pilih Status Berita:</label>
+              <CustomDropdown
+                value={
+                  statusBerita.find((item) => item.key === datas.status) || null
+                }
+                filter
+                options={statusBerita || []}
+                optionLabel="label"
+                placeholder="Pilih Status Berita"
+                className="p-2 rounded"
+                onChange={(e) =>
+                  setDatas((prev) => ({ ...prev, status: e.value.key }))
+                }
+              />
+              {errors.status && (
+                <small className="p-error">{errors.status}</small>
+              )}
+            </>
+          )}
 
           <label htmlFor="" className="-mb-3">
             Ringkasan Artikel:

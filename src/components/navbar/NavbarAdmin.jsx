@@ -36,13 +36,21 @@ const NavbarAdmin = ({ children }) => {
     }
   }, [showToast]);
 
+  const handleSidebarToggle = () => {
+    setToggle(!toggle);
+  };
+
   return (
     <div className="flex h-screen w-full">
       <Toast
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
       />{" "}
-      <CustomSidebar expanded={expanded} />
+      <CustomSidebar
+        expanded={expanded}
+        toggled={toggle}
+        onBackdropClick={handleSidebarToggle}
+      />{" "}
       <div className="flex flex-col w-full overflow-hidden ">
         {/* Navbar */}
         <div className="flex items-center px-6  w-full z-40 shadow-md dark:bg-blackHover  bg-white text-black">

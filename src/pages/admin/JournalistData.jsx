@@ -136,14 +136,16 @@ const JournalistData = () => {
       const response = await createJournalist(token, data);
 
       if (response.status === 201) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Pengguna Ditambahkan",
-          life: 3000,
-        });
         fetchJournalist();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Pengguna Ditambahkan",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -193,14 +195,16 @@ const JournalistData = () => {
       const response = await updateUser(token, currentId, data);
 
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Jurnalis Diperbarui",
-          life: 3000,
-        });
         fetchJournalist();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Jurnalis Diperbarui",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -209,7 +213,7 @@ const JournalistData = () => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
-      } else if (error.response.status === 409) {
+      } else if (error.response.status === 422) {
         toast.current.show({
           severity: "error",
           summary: "Gagal",
@@ -240,14 +244,16 @@ const JournalistData = () => {
     try {
       const response = await deleteUser(token, currentId);
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Jurnalis Dihapus",
-          life: 3000,
-        });
         fetchJournalist();
         setIsDeleteModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Jurnalis Dihapus",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (

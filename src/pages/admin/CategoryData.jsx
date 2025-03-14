@@ -122,14 +122,16 @@ const CategoryData = () => {
       const response = await createCategory(token, data);
 
       if (response.status === 201) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Kategori Ditambahkan",
-          life: 3000,
-        });
         fetchCategory();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Kategori Ditambahkan",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -170,14 +172,16 @@ const CategoryData = () => {
       const response = await updateCategory(token, currentId, data);
 
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Kategpri Diperbarui",
-          life: 3000,
-        });
         fetchCategory();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Kategori Diperbarui",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (
@@ -204,14 +208,16 @@ const CategoryData = () => {
     try {
       const response = await deleteCategory(token, currentId);
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Kategori Dihapus",
-          life: 3000,
-        });
         fetchCategory();
         setIsDeleteModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Kategori Dihapus",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {

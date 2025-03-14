@@ -5,25 +5,19 @@ import {
   User,
   UserPen,
 } from "lucide-react";
-import { useState } from "react";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
+import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import logo from "../../assets/infonesia-logo.png";
 
-const CustomSidebar = ({ expanded }) => {
-  const [toggle, setToggle] = useState(false);
-  const handleSidebarToggle = () => {
-    setToggle(!toggle);
-  };
-
+const CustomSidebar = ({ expanded, toggled, onBackdropClick }) => {
   return (
     <Sidebar
-      className="md:w-1/4 md:block  text-white border-r-white bg-blue-500"
+      className="md:w-1/4 md:block text-white border-r-white bg-blue-500"
       backgroundColor={``}
-      collapsed={toggle ? false : expanded}
+      collapsed={expanded}
       breakPoint={"md"}
-      toggled={toggle}
-      onBackdropClick={handleSidebarToggle}
+      toggled={toggled}
+      onBackdropClick={onBackdropClick}
     >
       <Menu
         menuItemStyles={{
@@ -41,7 +35,7 @@ const CustomSidebar = ({ expanded }) => {
       >
         <Menu>
           <div
-            className={`flex flex-col  font-semibold text-lg mb-2 items-center mt-0.5 justify-center`}
+            className={`flex flex-col font-semibold text-lg mb-2 items-center mt-0.5 justify-center`}
           >
             <>
               <div>
@@ -81,7 +75,7 @@ const CustomSidebar = ({ expanded }) => {
             component={
               <Link
                 to="/admin/beranda"
-                className={`flex  hover:bg-blue-100  ${
+                className={`flex hover:bg-blue-100 ${
                   location.pathname === "/admin/beranda" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
@@ -95,7 +89,7 @@ const CustomSidebar = ({ expanded }) => {
             component={
               <Link
                 to="/admin/pengguna"
-                className={`flex  hover:bg-blue-600  ${
+                className={`flex hover:bg-blue-600 ${
                   location.pathname === "/admin/pengguna" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
@@ -109,7 +103,7 @@ const CustomSidebar = ({ expanded }) => {
             component={
               <Link
                 to="/admin/jurnalis"
-                className={`flex  hover:bg-blue-600  ${
+                className={`flex hover:bg-blue-600 ${
                   location.pathname === "/admin/jurnalis" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
@@ -123,7 +117,7 @@ const CustomSidebar = ({ expanded }) => {
             component={
               <Link
                 to="/admin/berita"
-                className={`flex  hover:bg-blue-600  ${
+                className={`flex hover:bg-blue-600 ${
                   location.pathname === "/admin/berita" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>
@@ -137,7 +131,7 @@ const CustomSidebar = ({ expanded }) => {
             component={
               <Link
                 to="/admin/kategori"
-                className={`flex  hover:bg-blue-600  ${
+                className={`flex hover:bg-blue-600 ${
                   location.pathname === "/admin/kategori" ? "bg-blue-400" : ""
                 } rounded ${expanded ? "mx-2" : ""} transition-all`}
               ></Link>

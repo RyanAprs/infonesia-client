@@ -119,16 +119,19 @@ const UserData = () => {
       UserCreateSchema.parse(userData);
 
       const response = await createUser(token, data);
+      console.log(response);
 
       if (response.status === 201) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Pengguna Ditambahkan",
-          life: 3000,
-        });
         fetchUser();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Pengguna Dibuat",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -177,14 +180,16 @@ const UserData = () => {
       const response = await updateUser(token, currentId, data);
 
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Pengguna Diperbarui",
-          life: 3000,
-        });
         fetchUser();
         setIsCreateAndUpdateModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Pengguna Diperbarui",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (error instanceof ZodError) {
@@ -193,7 +198,7 @@ const UserData = () => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
-      } else if (error.response.status === 409) {
+      } else if (error.response.status === 422) {
         toast.current.show({
           severity: "error",
           summary: "Gagal",
@@ -224,14 +229,16 @@ const UserData = () => {
     try {
       const response = await deleteUser(token, currentId);
       if (response.status === 200) {
-        toast.current.show({
-          severity: "success",
-          summary: "Berhasil",
-          detail: "Data Pengguna Dihapus",
-          life: 3000,
-        });
         fetchUser();
         setIsDeleteModalOpen(false);
+        setTimeout(() => {
+          toast.current?.show({
+            severity: "success",
+            summary: "Berhasil",
+            detail: "Data Pengguna Dihapus",
+            life: 3000,
+          });
+        }, 100);
       }
     } catch (error) {
       if (
@@ -266,7 +273,8 @@ const UserData = () => {
       <Toast
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
-      />{" "}
+        style={{ zIndex: 10000 }}
+      />
       <div className="min-h-screen  bg-white rounded-xl">
         <CustomTable
           columns={columns}
