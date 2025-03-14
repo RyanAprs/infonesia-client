@@ -10,7 +10,6 @@ import ResizeModule from "@botom/quill-resize-module";
 import { Scope } from "parchment";
 import UseAuthManager from "../../store/AuthProvider.jsx";
 import CustomTable from "../../components/table/customTable.jsx";
-import { getAllUser } from "../../services/UserService.js";
 import FormModal from "../../components/modal/FormModal.jsx";
 import ImageCropModal from "../../components/modal/ImageCropperModal.jsx";
 import CustomDropdown from "../../components/dropDown/CustomDropDown.jsx";
@@ -22,11 +21,11 @@ import { getAllCategory } from "../../services/categoryService.js";
 import {
   createNews,
   deleteNews,
-  getAllNews,
+  getAllNewsByCreator,
   getNewsById,
   updateNews,
 } from "../../services/ArticleService.js";
-import { NewsCreateSchemaAdmin } from "../../validations/NewsSchema.jsx";
+import { NewsCreateSchema } from "../../validations/NewsSchema.jsx";
 import { ZodError } from "zod";
 import TagInput from "../../components/tagInput/TagInput.jsx";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -57,7 +56,6 @@ const NewsData = () => {
   const toast = useRef(null);
   const [isConnectionError, setisConnectionError] = useState(false);
   const [loadingPage, setLoadingPage] = useState(false);
-  const [author, setAuthor] = useState([]);
   const [category, setCategory] = useState([]);
   const [visibleCropImage, setVisibleCropImage] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -83,7 +81,7 @@ const NewsData = () => {
   const fetchData = async () => {
     try {
       setLoadingPage(true);
-      const response = await getAllNews(token);
+      const response = await getAllNewsByCreator(token);
 
       setData(response);
       setisConnectionError(false);
@@ -133,10 +131,8 @@ const NewsData = () => {
     });
 
     try {
-      const responseUser = await getAllUser(token, "JOURNALIST");
       const responseCategory = await getAllCategory(token);
 
-      setAuthor(responseUser);
       setCategory(responseCategory);
       setLoading(false);
     } catch (error) {
@@ -168,14 +164,12 @@ const NewsData = () => {
         categoryId: parseInt(datas.categoryId, 10),
       };
 
-      NewsCreateSchemaAdmin.parse(dataToSubmit);
+      NewsCreateSchema.parse(dataToSubmit);
 
       const formData = new FormData();
       formData.append("title", dataToSubmit.title);
       formData.append("content", dataToSubmit.content);
       formData.append("summary", dataToSubmit.summary);
-      formData.append("status", dataToSubmit.status);
-      formData.append("authorId", dataToSubmit.authorId);
       formData.append("categoryId", dataToSubmit.categoryId);
       formData.append("tags", JSON.stringify(dataToSubmit.tags));
       if (dataToSubmit.bannerImage instanceof Blob) {
@@ -227,10 +221,8 @@ const NewsData = () => {
     setVisible(true);
 
     try {
-      const responseUser = await getAllUser(token, "JOURNALIST");
       const responseCategory = await getAllCategory(token);
 
-      setAuthor(responseUser);
       setCategory(responseCategory);
     } catch (error) {
       if (
@@ -269,10 +261,8 @@ const NewsData = () => {
 
       if (dataResponse) {
         setDatas({
-          authorId: dataResponse.author.id,
           title: dataResponse.title,
           summary: dataResponse.summary,
-          status: dataResponse.status,
           content: dataResponse.content,
           bannerImage: dataResponse.bannerImage,
           categoryId: dataResponse.categoryId,
@@ -299,7 +289,7 @@ const NewsData = () => {
         content: editorContentRef.current,
       };
 
-      NewsCreateSchemaAdmin.parse(dataToSubmit);
+      NewsCreateSchema.parse(dataToSubmit);
       const clonedData = structuredClone(dataToSubmit);
       const parser = new DOMParser();
       const doc = parser.parseFromString(clonedData.content, "text/html");
@@ -606,17 +596,6 @@ const NewsData = () => {
     { header: "Status", field: "status" },
   ];
 
-  const itemTemplateAuthor = (option) => {
-    return <div>{option.fullName}</div>;
-  };
-
-  const valueTemplateAuthor = (option) => {
-    if (option) {
-      return <div>{option.fullName}</div>;
-    }
-    return <span>Pilih Author</span>;
-  };
-
   const itemTemplateCategory = (option) => {
     return <div>{option.name}</div>;
   };
@@ -629,12 +608,6 @@ const NewsData = () => {
   };
 
   const statuses = [
-    { key: "DRAFT", label: "Draft" },
-    { key: "PUBLISHED", label: "Published" },
-    { key: "ARCHIVED", label: "Archived" },
-  ];
-
-  const statusBerita = [
     { key: "DRAFT", label: "Draft" },
     { key: "PUBLISHED", label: "Published" },
     { key: "ARCHIVED", label: "Archived" },
@@ -672,25 +645,6 @@ const NewsData = () => {
         isLoading={loading}
       >
         <div className="flex flex-col gap-4">
-          {/* Pilih Author */}
-          <label>Pilih Author:</label>
-          <CustomDropdown
-            value={author.find((item) => item.id === datas.authorId) || null}
-            filter
-            options={author || []}
-            optionLabel="fullName"
-            itemTemplate={itemTemplateAuthor}
-            valueTemplate={valueTemplateAuthor}
-            placeholder="Pilih Author"
-            className="p-2 rounded"
-            onChange={(e) =>
-              setDatas((prev) => ({ ...prev, authorId: e.value.id }))
-            }
-          />
-          {errors.authorId && (
-            <small className="p-error">{errors.authorId}</small>
-          )}
-
           <div className="flex flex-col gap-2">
             <label htmlFor="" className="-mb-3">
               Pilih Gambar Banner:
@@ -744,29 +698,6 @@ const NewsData = () => {
             }
           />
           {errors.title && <small className="p-error">{errors.title}</small>}
-
-          {/* Status */}
-          {isEditMode && (
-            <>
-              <label>Pilih Status Berita:</label>
-              <CustomDropdown
-                value={
-                  statusBerita.find((item) => item.key === datas.status) || null
-                }
-                filter
-                options={statusBerita || []}
-                optionLabel="label"
-                placeholder="Pilih Status Berita"
-                className="p-2 rounded"
-                onChange={(e) =>
-                  setDatas((prev) => ({ ...prev, status: e.value.key }))
-                }
-              />
-              {errors.status && (
-                <small className="p-error">{errors.status}</small>
-              )}
-            </>
-          )}
 
           <label htmlFor="" className="-mb-3">
             Ringkasan Artikel:

@@ -1,15 +1,14 @@
-import {
-  ClipboardList,
-  LayoutGrid,
-  Newspaper,
-  User,
-  UserPen,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
+import { Sidebar, Menu } from "react-pro-sidebar";
 import logo from "../../assets/infonesia-logo.png";
+import { getRole } from "../ProtectedRoute/ProtectedRoute";
+import UseAuthManager from "../../store/AuthProvider";
+import { AdminItems, JournalistItems } from "./Items";
 
 const CustomSidebar = ({ expanded, toggled, onBackdropClick }) => {
+  const { token } = UseAuthManager();
+
+  const role = getRole(token);
+
   return (
     <Sidebar
       className="md:w-1/4 md:block text-white border-r-white bg-blue-500"
@@ -68,78 +67,11 @@ const CustomSidebar = ({ expanded, toggled, onBackdropClick }) => {
           </div>
         </Menu>
 
-        <>
-          <MenuItem
-            className={`${expanded ? "mb-2" : "mb-3"}`}
-            icon={<LayoutGrid />}
-            component={
-              <Link
-                to="/admin/beranda"
-                className={`flex hover:bg-blue-100 ${
-                  location.pathname === "/admin/beranda" ? "bg-blue-400" : ""
-                } rounded ${expanded ? "mx-2" : ""} transition-all`}
-              ></Link>
-            }
-          >
-            Beranda
-          </MenuItem>
-          <MenuItem
-            className={`${expanded ? "mb-2" : "mb-3"}`}
-            icon={<User />}
-            component={
-              <Link
-                to="/admin/pengguna"
-                className={`flex hover:bg-blue-600 ${
-                  location.pathname === "/admin/pengguna" ? "bg-blue-400" : ""
-                } rounded ${expanded ? "mx-2" : ""} transition-all`}
-              ></Link>
-            }
-          >
-            Pengguna
-          </MenuItem>
-          <MenuItem
-            className={`${expanded ? "mb-2" : "mb-3"}`}
-            icon={<UserPen />}
-            component={
-              <Link
-                to="/admin/jurnalis"
-                className={`flex hover:bg-blue-600 ${
-                  location.pathname === "/admin/jurnalis" ? "bg-blue-400" : ""
-                } rounded ${expanded ? "mx-2" : ""} transition-all`}
-              ></Link>
-            }
-          >
-            Jurnalis
-          </MenuItem>
-          <MenuItem
-            className={`${expanded ? "mb-2" : "mb-3"}`}
-            icon={<Newspaper />}
-            component={
-              <Link
-                to="/admin/berita"
-                className={`flex hover:bg-blue-600 ${
-                  location.pathname === "/admin/berita" ? "bg-blue-400" : ""
-                } rounded ${expanded ? "mx-2" : ""} transition-all`}
-              ></Link>
-            }
-          >
-            Berita
-          </MenuItem>
-          <MenuItem
-            className={`${expanded ? "mb-2" : "mb-3"}`}
-            icon={<ClipboardList />}
-            component={
-              <Link
-                to="/admin/kategori"
-                className={`flex hover:bg-blue-600 ${
-                  location.pathname === "/admin/kategori" ? "bg-blue-400" : ""
-                } rounded ${expanded ? "mx-2" : ""} transition-all`}
-              ></Link>
-            }
-          >
-            Kategori
-          </MenuItem>
-        </>
+        {role === "ADMIN" ? (
+          <AdminItems expanded={expanded} />
+        ) : (
+          <JournalistItems expanded={expanded} />
+        )}
       </Menu>
     </Sidebar>
   );

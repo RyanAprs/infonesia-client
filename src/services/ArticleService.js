@@ -23,6 +23,27 @@ export const getAllNews = async (token) => {
   }
 };
 
+export const getAllNewsByCreator = async (token) => {
+  try {
+    const response = await axios.get(`${API_BASE_URI}/api/article/user`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    if (!response.data || !response.data.data) {
+      return [];
+    }
+
+    if (response.status === 200) {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    throw error;
+  }
+};
+
 export const getNewsById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URI}/api/article/${id}`);

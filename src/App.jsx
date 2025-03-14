@@ -5,13 +5,19 @@ import RegisterUser from "./pages/auth/RegisterUser";
 import LoginAdmin from "./pages/auth/LoginAdmin";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import NavbarAdmin from "./components/navbar/NavbarAdmin";
-import { AdminProtectedRoute } from "./components/ProtectedRoute/ProtectedRoute";
+import {
+  AdminProtectedRoute,
+  JournalistProtectedRoute,
+} from "./components/ProtectedRoute/ProtectedRoute";
 import UserData from "./pages/admin/UserData";
 import NewsData from "./pages/admin/NewsData";
 import JournalistData from "./pages/admin/JournalistData";
 import CategoryData from "./pages/admin/CategoryData";
 import UseAuthManager from "./store/AuthProvider";
 import LoginJournalist from "./pages/auth/LoginJournalist";
+import DashboardJournalist from "./pages/journalist/DashboardJournalist";
+import NewsDataJurnalist from "./pages/journalist/NewsDataJournalist";
+import CategoryDataJournalist from "./pages/journalist/CategoryDataJournalist";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
@@ -86,6 +92,45 @@ function App() {
 
         {/* JOURNALIST */}
         <Route path="/jurnalis/login" element={<LoginJournalist />} />
+        <Route
+          element={
+            <JournalistProtectedRoute
+              isAuthenticated={isAuthenticated}
+              token={token}
+            />
+          }
+        >
+          <Route
+            path="/jurnalis/beranda"
+            element={
+              <>
+                <NavbarAdmin>
+                  <DashboardJournalist />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/jurnalis/berita"
+            element={
+              <>
+                <NavbarAdmin>
+                  <NewsDataJurnalist />
+                </NavbarAdmin>
+              </>
+            }
+          />
+          <Route
+            path="/jurnalis/kategori"
+            element={
+              <>
+                <NavbarAdmin>
+                  <CategoryDataJournalist />
+                </NavbarAdmin>
+              </>
+            }
+          />
+        </Route>
 
         {/* USER */}
         <Route path="/login" element={<LoginUser />} />

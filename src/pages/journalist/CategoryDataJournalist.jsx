@@ -16,7 +16,7 @@ import ErrorConnection from "../../components/errorConnection/errorConnection";
 import { ZodError } from "zod";
 import { CategorySchema } from "../../validations/CategorySchema";
 
-const CategoryData = () => {
+const CategoryDataJournalist = () => {
   const { token } = UseAuthManager();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -220,6 +220,8 @@ const CategoryData = () => {
         }, 100);
       }
     } catch (error) {
+      console.log(error.response);
+
       if (error instanceof ZodError) {
         const newErrors = {};
         error.errors.forEach((e) => {
@@ -318,4 +320,4 @@ const CategoryData = () => {
   );
 };
 
-export default CategoryData;
+export default CategoryDataJournalist;

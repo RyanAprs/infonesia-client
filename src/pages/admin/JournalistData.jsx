@@ -268,6 +268,13 @@ const JournalistData = () => {
         error.code === "EPIPE"
       ) {
         setisConnectionError(true);
+      } else if (error.response.status === 500) {
+        toast.current?.show({
+          severity: "error",
+          summary: "Gagal",
+          detail: "Data Jurnalis Ini Masih Terikat dengan Data Lain",
+          life: 3000,
+        });
       }
     } finally {
       setLoading(false);
