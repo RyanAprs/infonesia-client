@@ -137,3 +137,34 @@ export const deleteNews = async (token, id) => {
     throw error;
   }
 };
+
+export const getAllPublishedNews = async () => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URI}/api/article?status=PUBLISHED`
+    );
+
+    if (!response.data || !response.data.data) {
+      return [];
+    }
+
+    if (response.status === 200) {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    throw error;
+  }
+};
+
+export const getArticleByTitle = async (slug) => {
+  try {
+    const response = await axios.get(`${API_BASE_URI}/api/article/${slug}`);
+    if (response.status === 200) {
+      return response.data.data;
+    }
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    throw error;
+  }
+};

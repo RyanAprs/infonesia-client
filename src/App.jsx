@@ -18,6 +18,7 @@ import LoginJournalist from "./pages/auth/LoginJournalist";
 import DashboardJournalist from "./pages/journalist/DashboardJournalist";
 import NewsDataJurnalist from "./pages/journalist/NewsDataJournalist";
 import CategoryDataJournalist from "./pages/journalist/CategoryDataJournalist";
+import DetailArticle from "./pages/public/DetailArticle";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         {/* PUBLIC */}
         <Route path="/" element={<ArticleList />} />
+        <Route path="/:slug" element={<DetailArticle />} />
 
         {/* ADMIN */}
         <Route path="/admin/login" element={<LoginAdmin />} />
