@@ -220,6 +220,7 @@ const NewsData = () => {
     setErrors({});
     setCroppedImage(null);
     setSelectedImage(null);
+    setIsEditMode(true);
     if (cropperRef.current) {
       cropperRef.current.destroy();
       cropperRef.current = null;
@@ -253,6 +254,7 @@ const NewsData = () => {
 
     try {
       const dataResponse = await getNewsById(data.id);
+
       if (dataResponse.content) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(dataResponse.content, "text/html");
@@ -281,7 +283,6 @@ const NewsData = () => {
 
         editorContentRef.current = dataResponse.summary;
         setCurrentId(data.id);
-        setIsEditMode(true);
         setVisible(true);
       }
     } catch (error) {

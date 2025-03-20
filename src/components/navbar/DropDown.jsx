@@ -5,6 +5,7 @@ import {
   CircleUserRoundIcon,
   DoorOpen,
   LockKeyhole,
+  LogIn,
   UserCircle,
 } from "lucide-react";
 import { InputText } from "primereact/inputtext";
@@ -24,6 +25,8 @@ import {
 } from "../../services/ProfileService";
 import { jwtDecode } from "jwt-decode";
 import { Toast } from "primereact/toast";
+import LoadingPage from "../Loading/LoadingPage";
+import ErrorConnection from "../errorConnection/errorConnection";
 
 const DropDown = () => {
   const { logout, token } = UseAuthManager();
@@ -45,19 +48,42 @@ const DropDown = () => {
     email: "",
   });
   const toast = useRef(null);
+  const [isConnectionError, setisConnectionError] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(false);
 
-  const data = jwtDecode(token);
+  let data;
+
+  if (token) {
+    data = jwtDecode(token);
+  }
 
   const getProfileData = async () => {
     try {
-      const response = await getCurrentUser(token);
+      if (token) {
+        setLoadingPage(true);
+        const response = await getCurrentUser(token);
 
-      setDataProfile({
-        fullName: response.fullName,
-        email: response.email,
-      });
+        setDataProfile({
+          fullName: response.fullName,
+          email: response.email,
+        });
+      }
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
     }
   };
 
@@ -91,6 +117,18 @@ const DropDown = () => {
           detail: "Email sudah terdaftar, gunakan email yang lain!",
           life: 3000,
         });
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
       }
     } finally {
       setLoading(false);
@@ -142,6 +180,18 @@ const DropDown = () => {
           detail: "Password lama anda salah",
           life: 3000,
         });
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setisConnectionError(true);
       }
     } finally {
       setLoading(false);
@@ -188,7 +238,7 @@ const DropDown = () => {
     });
   };
 
-  const menuSections = [
+  const adminMenuSections = [
     {
       items: [
         {
@@ -216,58 +266,77 @@ const DropDown = () => {
     },
   ];
 
+  const handleLoginNavigate = () => {
+    navigate("/login");
+  };
+
+  if (loadingPage) {
+    <LoadingPage />;
+  }
+
+  if (isConnectionError) {
+    <ErrorConnection fetchData={getProfileData} />;
+  }
+
   return (
     <>
       <Toast
         ref={toast}
         position={window.innerWidth <= 767 ? "top-center" : "top-right"}
       />
-      <Menu as="div" className="relative inline-block text-left ">
-        <>
-          <Menu.Button
-            className="flex items-center gap-3"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <div className="flex items-center gap-1 text-lg text-blue-800">
-              <div className="flex justify-center items-center gap-2">
-                <UserCircle size={35} />
-                <ChevronDown />
-              </div>
-            </div>
-          </Menu.Button>
 
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-200"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-150"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <Menu.Items className="absolute right-0 z-50 mt-3 w-60 origin-top-right divide-y rounded-lg shadow-lg ring-1 bg-blue-400 ring-white">
-              {menuSections.map((section, sectionIndex) => (
-                <div
-                  key={sectionIndex}
-                  className="py-2 font-medium px-2 rounded"
-                >
-                  {section.items.map((item, itemIndex) => (
-                    <Menu.Item key={itemIndex}>
-                      <button
-                        onClick={item.onClick}
-                        className={`flex w-full items-center rounded-md gap-1.5 px-4 py-2 text-sm text-white ${section.activeClassName}`}
-                      >
-                        {item.icon}
-                        {item.label}
-                      </button>
-                    </Menu.Item>
-                  ))}
+      {token === null ? (
+        <div className="cursor-pointer" onClick={handleLoginNavigate}>
+          <LogIn className="h-7 w-7" />
+        </div>
+      ) : (
+        <Menu as="div" className="relative inline-block text-left ">
+          <>
+            <Menu.Button
+              className="flex items-center gap-3"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <div className="flex items-center gap-1 text-lg text-blue-800">
+                <div className="flex justify-center items-center gap-2">
+                  <UserCircle size={35} />
+                  <ChevronDown />
                 </div>
-              ))}
-            </Menu.Items>
-          </Transition>
-        </>
-      </Menu>
+              </div>
+            </Menu.Button>
+
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-200"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-150"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 z-50 mt-3 w-60 origin-top-right divide-y rounded-lg shadow-lg ring-1 bg-blue-400 ring-white">
+                {adminMenuSections.map((section, sectionIndex) => (
+                  <div
+                    key={sectionIndex}
+                    className="py-2 font-medium px-2 rounded"
+                  >
+                    {section.items.map((item, itemIndex) => (
+                      <Menu.Item key={itemIndex}>
+                        <button
+                          onClick={item.onClick}
+                          className={`flex w-full items-center rounded-md gap-1.5 px-4 py-2 text-sm text-white ${section.activeClassName}`}
+                        >
+                          {item.icon}
+                          {item.label}
+                        </button>
+                      </Menu.Item>
+                    ))}
+                  </div>
+                ))}
+              </Menu.Items>
+            </Transition>
+          </>
+        </Menu>
+      )}
 
       <FormModal
         visible={isProfileModalOpen}

@@ -47,9 +47,8 @@ export const getAllNewsByCreator = async (token) => {
 export const getNewsById = async (id) => {
   try {
     const response = await axios.get(`${API_BASE_URI}/api/article/${id}`);
-    if (response.status === 200) {
-      return response.data.data;
-    }
+
+    return response.data.data;
   } catch (error) {
     console.error("Error fetching news:", error);
     throw error;
@@ -159,7 +158,9 @@ export const getAllPublishedNews = async () => {
 
 export const getArticleByTitle = async (slug) => {
   try {
-    const response = await axios.get(`${API_BASE_URI}/api/article/${slug}`);
+    const response = await axios.get(
+      `${API_BASE_URI}/api/article/title/${slug}`
+    );
     if (response.status === 200) {
       return response.data.data;
     }

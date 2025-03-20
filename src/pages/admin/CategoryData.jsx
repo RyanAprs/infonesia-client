@@ -9,12 +9,12 @@ import {
 import UseAuthManager from "../../store/AuthProvider";
 import { InputText } from "primereact/inputtext";
 import FormModal from "../../components/modal/FormModal";
-import CustomTable from "../../components/table/customTable";
 import { Toast } from "primereact/toast";
 import LoadingPage from "../../components/Loading/LoadingPage";
 import ErrorConnection from "../../components/errorConnection/errorConnection";
 import { ZodError } from "zod";
 import { CategorySchema } from "../../validations/CategorySchema";
+import CustomTable from "../../components/table/customTable";
 
 const CategoryData = () => {
   const { token } = UseAuthManager();

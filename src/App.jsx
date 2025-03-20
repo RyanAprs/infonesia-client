@@ -19,6 +19,7 @@ import DashboardJournalist from "./pages/journalist/DashboardJournalist";
 import NewsDataJurnalist from "./pages/journalist/NewsDataJournalist";
 import CategoryDataJournalist from "./pages/journalist/CategoryDataJournalist";
 import DetailArticle from "./pages/public/DetailArticle";
+import PublicNavbar from "./components/navbar/PublicNavbar";
 
 function App() {
   const { isAuthenticated, token } = UseAuthManager();
@@ -27,8 +28,26 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* PUBLIC */}
-        <Route path="/" element={<ArticleList />} />
-        <Route path="/:slug" element={<DetailArticle />} />
+        <Route
+          path="/"
+          element={
+            <>
+              <PublicNavbar>
+                <ArticleList />
+              </PublicNavbar>
+            </>
+          }
+        />
+        <Route
+          path="/artikel/:slug"
+          element={
+            <>
+              <PublicNavbar>
+                <DetailArticle />
+              </PublicNavbar>
+            </>
+          }
+        />
 
         {/* ADMIN */}
         <Route path="/admin/login" element={<LoginAdmin />} />
