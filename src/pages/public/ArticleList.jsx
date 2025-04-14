@@ -104,7 +104,7 @@ const ArtikelList = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Main content */}
-      <main className="flex flex-col px-4 py-8">
+      <main className="flex flex-col md:px-36 px-4 py-4 md:py-8">
         {/* Search and filter section */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row gap-4">
@@ -151,7 +151,7 @@ const ArtikelList = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-4 md:gap-8">
           {!loading &&
             !isConnectionError &&
             filteredArticles &&

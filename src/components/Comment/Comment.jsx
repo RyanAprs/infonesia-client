@@ -3,7 +3,7 @@ import { DateFormat } from "../../utils/DateFormat";
 import UseAuthManager from "../../store/AuthProvider";
 import { Link } from "react-router-dom";
 
-const Comment = ({ data, handleSubmitComment, comment, setComment }) => {
+const Comment = ({ data, handleSubmitComment, comment, setComment, error }) => {
   const { isAuthenticated } = UseAuthManager();
 
   return (
@@ -26,12 +26,16 @@ const Comment = ({ data, handleSubmitComment, comment, setComment }) => {
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
               rows={3}
             />
-            <button
-              type="submit"
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              Post Comment
-            </button>
+
+            <div className="flex flex-col ">
+              {error && <span className="text-red-500">{error.content}</span>}
+              <button
+                type="submit"
+                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Post Comment
+              </button>
+            </div>
           </>
         ) : (
           <div className="flex justify-center items-center ">

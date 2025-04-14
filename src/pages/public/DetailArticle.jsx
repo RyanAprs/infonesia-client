@@ -1,26 +1,35 @@
 import { useParams } from "react-router-dom";
 import { getArticleByTitle } from "../../services/ArticleService";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Calendar, Clock, Tag } from "lucide-react";
 import LoadingPage from "../../components/Loading/LoadingPage";
 import ErrorConnection from "../../components/errorConnection/errorConnection";
 import { DateFormat } from "../../utils/DateFormat";
 import Comment from "../../components/Comment/Comment";
+import { postComment } from "../../services/CommentService";
+import UseAuthManager from "../../store/AuthProvider";
+import { Toast } from "primereact/toast";
+import { ZodError } from "zod";
+import { CommentSchema } from "../../validations/CommentSchema";
 
 const baseUrl = `${import.meta.env.VITE_API_BASE_URI}/uploads/images/`;
 
 const DetailArticle = () => {
   const { slug } = useParams();
+  const { token } = UseAuthManager();
   const [comment, setComment] = useState("");
   const [loadingPage, setLoadingPage] = useState(false);
   const [data, setData] = useState(null);
   const [isConnectionError, setIsConnectionError] = useState(false);
+  const [id, setId] = useState("");
+  const toast = useRef(null);
+  const [errors, setErrors] = useState({});
 
   const fetchData = async () => {
     try {
       setLoadingPage(true);
       const response = await getArticleByTitle(slug);
-      console.log(response);
+      setId(response.id);
 
       setData(response);
     } catch (error) {
@@ -38,7 +47,7 @@ const DetailArticle = () => {
         setIsConnectionError(true);
       }
     } finally {
-    setLoadingPage(false);
+      setLoadingPage(false);
     }
   };
 
@@ -46,7 +55,50 @@ const DetailArticle = () => {
     fetchData();
   }, []);
 
-  const handleSubmitComment = () => {};
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    try {
+      CommentSchema.parse(comment);
+
+      console.log(comment);
+
+      // const response = await postComment(token, id, comment);
+
+      // if (response.status === 201) {
+      //   setTimeout(() => {
+      //     toast.current?.show({
+      //       severity: "success",
+      //       summary: "Berhasil",
+      //       detail: "Comment Posted Successfully",
+      //       life: 3000,
+      //     });
+      //   }, 100);
+      //   fetchData();
+      // }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setIsConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
+    }
+  };
 
   if (loadingPage) {
     return <LoadingPage />;
@@ -62,6 +114,11 @@ const DetailArticle = () => {
 
   return (
     <div className="min-h-screen ">
+      <Toast
+        ref={toast}
+        position={window.innerWidth <= 767 ? "top-center" : "top-right"}
+        style={{ zIndex: 10000 }}
+      />
       <div className=" bg-white  mx-auto md:px-28 md:py-8 px-8 py-4">
         {/* Category */}
         <div className="mb-4">
@@ -122,6 +179,7 @@ const DetailArticle = () => {
 
         {/* Comments Section */}
         <Comment
+          error={errors}
           comment={comment}
           data={data}
           handleSubmitComment={handleSubmitComment}
