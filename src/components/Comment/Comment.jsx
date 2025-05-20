@@ -2,9 +2,43 @@ import { MessageCircle } from "lucide-react";
 import { DateFormat } from "../../utils/DateFormat";
 import UseAuthManager from "../../store/AuthProvider";
 import { Link } from "react-router-dom";
+import { getUserById } from "../../services/UserService";
+import { useEffect, useState } from "react";
 
 const Comment = ({ data, handleSubmitComment, comment, setComment, error }) => {
   const { isAuthenticated } = UseAuthManager();
+  const [users, setUsers] = useState({});
+
+  const comments = data.comments;
+  const uniqueUserIds = comments.reduce((acc, comment) => {
+    acc[comment.userId] = true;
+    return acc;
+  }, {});
+
+  const fetchUsers = async () => {
+    try {
+      const userPromises = Object.keys(uniqueUserIds).map((userId) =>
+        getUserById(userId)
+      );
+
+      const fetchedUsers = await Promise.all(userPromises);
+
+      const usersObject = fetchedUsers.reduce((acc, user) => {
+        acc[user.id] = user;
+        return acc;
+      }, {});
+
+      console.log(usersObject);
+
+      setUsers(usersObject);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <div className="border-t pt-8">
@@ -46,11 +80,13 @@ const Comment = ({ data, handleSubmitComment, comment, setComment, error }) => {
         )}
       </form>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
         {data.comments.map((comment) => (
-          <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
+          <div key={comment.id} className="bg-gray-100 p-4 rounded-lg">
             <div className="flex justify-between items-start mb-2">
-              <h3 className="font-medium text-gray-900">{comment.name}</h3>
+              <h3 className="font-medium text-gray-900">
+                {users[comment.userId]?.fullName || "Anonymous"}
+              </h3>
               <span className="text-sm text-gray-500">
                 {DateFormat(comment.createdAt)}
               </span>

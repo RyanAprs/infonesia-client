@@ -29,8 +29,8 @@ const DetailArticle = () => {
     try {
       setLoadingPage(true);
       const response = await getArticleByTitle(slug);
-      setId(response.id);
 
+      setId(response.id);
       setData(response);
     } catch (error) {
       if (
@@ -57,31 +57,42 @@ const DetailArticle = () => {
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
+    setLoadingPage(true);
+    setErrors({});
+
     try {
-      CommentSchema.parse(comment);
+      CommentSchema.parse({ content: comment });
 
-      console.log(comment);
+      const response = await postComment(token, id, comment);
 
-      // const response = await postComment(token, id, comment);
+      if (response && response.status === 201) {
+        toast.current?.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Comment posted successfully",
+          life: 3000,
+        });
 
-      // if (response.status === 201) {
-      //   setTimeout(() => {
-      //     toast.current?.show({
-      //       severity: "success",
-      //       summary: "Berhasil",
-      //       detail: "Comment Posted Successfully",
-      //       life: 3000,
-      //     });
-      //   }, 100);
-      //   fetchData();
-      // }
+        setComment("");
+
+        await fetchData();
+      }
     } catch (error) {
+      console.error("Comment submission error:", error);
+
       if (error instanceof ZodError) {
         const newErrors = {};
         error.errors.forEach((e) => {
           newErrors[e.path[0]] = e.message;
         });
         setErrors(newErrors);
+
+        toast.current?.show({
+          severity: "error",
+          summary: "Validation Error",
+          detail: "Please check your comment",
+          life: 3000,
+        });
       } else if (
         error.code === "ERR_NETWORK" ||
         error.code === "ETIMEDOUT" ||
@@ -94,6 +105,13 @@ const DetailArticle = () => {
         error.code === "EPIPE"
       ) {
         setIsConnectionError(true);
+
+        toast.current?.show({
+          severity: "error",
+          summary: "Connection Error",
+          detail: "Please check your internet connection",
+          life: 3000,
+        });
       }
     } finally {
       setLoadingPage(false);

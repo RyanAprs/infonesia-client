@@ -23,13 +23,9 @@ export const getAllUser = async (token, role) => {
   }
 };
 
-export const getUserById = async (token, id) => {
+export const getUserById = async (id) => {
   try {
-    const response = await axios.get(`${API_BASE_URI}/api/user/${id}`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+    const response = await axios.get(`${API_BASE_URI}/api/user/${id}`);
     if (response.status === 200) {
       return response.data.data;
     }
