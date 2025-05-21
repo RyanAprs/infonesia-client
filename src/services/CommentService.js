@@ -20,3 +20,22 @@ export const postComment = async (token, id, content) => {
     throw error;
   }
 };
+
+export const updateComment = async (token, id, content) => {
+  try {
+    const response = await axios.put(
+      `${API_BASE_URI}/api/comment/${id}`,
+      { content },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    throw error;
+  }
+};

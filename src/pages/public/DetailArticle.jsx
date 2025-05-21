@@ -202,6 +202,7 @@ const DetailArticle = () => {
           data={data}
           handleSubmitComment={handleSubmitComment}
           setComment={setComment}
+          fetchData={fetchData}
         />
       </div>
     </div>

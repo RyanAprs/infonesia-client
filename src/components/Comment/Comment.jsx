@@ -11,6 +11,11 @@ import { Link } from "react-router-dom";
 import { getUserById } from "../../services/UserService";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { CommentSchema } from "../../validations/CommentSchema";
+import { ZodError } from "zod";
+import { updateComment } from "../../services/CommentService";
+import LoadingPage from "../Loading/LoadingPage";
+import ErrorConnection from "../errorConnection/errorConnection";
 
 const Comment = ({
   data,
@@ -19,7 +24,7 @@ const Comment = ({
   setComment,
   error,
   onDelete,
-  onUpdate,
+  fetchData,
 }) => {
   const { isAuthenticated, token } = UseAuthManager();
   const [users, setUsers] = useState({});
@@ -27,6 +32,9 @@ const Comment = ({
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [showDropdown, setShowDropdown] = useState(null);
+  const [loadingPage, setLoadingPage] = useState(false);
+  const [isConnectionError, setIsConnectionError] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const decoded = jwtDecode(token);
   const id = decoded.id;
@@ -69,18 +77,61 @@ const Comment = ({
     setEditingCommentId(commentId);
     setEditContent(content);
     setShowDropdown(null);
+    setErrors({});
   };
 
   const handleUpdateComment = async (commentId) => {
-    await onUpdate(commentId, editContent);
-    setEditingCommentId(null);
-    setEditContent("");
+    setLoadingPage(true);
+    try {
+      CommentSchema.parse({ content: editContent });
+
+      const response = await updateComment(token, commentId, editContent);
+
+      if (response && response.status === 200) {
+        console.log(response);
+        setEditingCommentId(null);
+        setEditContent("");
+        await fetchData();
+      }
+    } catch (error) {
+      console.error("Comment submission error:", error);
+
+      if (error instanceof ZodError) {
+        const newErrors = {};
+        error.errors.forEach((e) => {
+          newErrors[e.path[0]] = e.message;
+        });
+        setErrors(newErrors);
+      } else if (
+        error.code === "ERR_NETWORK" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ENOTFOUND" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "EAI_AGAIN" ||
+        error.code === "EHOSTUNREACH" ||
+        error.code === "ECONNRESET" ||
+        error.code === "EPIPE"
+      ) {
+        setIsConnectionError(true);
+      }
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   const handleDeleteComment = async (commentId) => {
     await onDelete(commentId);
     setShowDropdown(null);
   };
+
+  if (loadingPage) {
+    return <LoadingPage />;
+  }
+
+  if (isConnectionError) {
+    return <ErrorConnection fetchData={fetchData} />;
+  }
 
   const CommentActions = ({ comment }) => {
     if (!isAuthenticated || id !== comment.userId) return null;
@@ -199,6 +250,9 @@ const Comment = ({
                   className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                   rows={3}
                 />
+                {errors && (
+                  <span className="text-red-500">{errors.content}</span>
+                )}
                 <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => handleUpdateComment(comment.id)}
