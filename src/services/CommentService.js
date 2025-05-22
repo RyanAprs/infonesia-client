@@ -35,7 +35,22 @@ export const updateComment = async (token, id, content) => {
 
     return response;
   } catch (error) {
-    console.error("Error creating comment:", error);
+    console.error("Error updating comment:", error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (token, id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URI}/api/comment/${id}`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
     throw error;
   }
 };

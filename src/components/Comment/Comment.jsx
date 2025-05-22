@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { CommentSchema } from "../../validations/CommentSchema";
 import { ZodError } from "zod";
-import { updateComment } from "../../services/CommentService";
+import { deleteComment, updateComment } from "../../services/CommentService";
 import LoadingPage from "../Loading/LoadingPage";
 import ErrorConnection from "../errorConnection/errorConnection";
 
@@ -88,7 +88,6 @@ const Comment = ({
       const response = await updateComment(token, commentId, editContent);
 
       if (response && response.status === 200) {
-        console.log(response);
         setEditingCommentId(null);
         setEditContent("");
         await fetchData();
@@ -121,8 +120,18 @@ const Comment = ({
   };
 
   const handleDeleteComment = async (commentId) => {
-    await onDelete(commentId);
-    setShowDropdown(null);
+    try {
+      const response = await deleteComment(token, commentId);
+
+      if (response && response.status === 200) {
+        setShowDropdown(null);
+        await fetchData();
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   if (loadingPage) {
