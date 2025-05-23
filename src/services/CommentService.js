@@ -54,3 +54,22 @@ export const deleteComment = async (token, id) => {
     throw error;
   }
 };
+
+export const replyComment = async (token, id, content) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URI}/api/comments/${id}/reply`,
+      { content },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw error;
+  }
+};

@@ -1,10 +1,4 @@
-import {
-  MessageCircle,
-  MoreVertical,
-  Reply,
-  Trash,
-  Pencil,
-} from "lucide-react";
+import { MessageCircle, MoreVertical, Trash, Pencil } from "lucide-react";
 import { DateFormat } from "../../utils/DateFormat";
 import UseAuthManager from "../../store/AuthProvider";
 import { Link } from "react-router-dom";
@@ -23,12 +17,10 @@ const Comment = ({
   comment,
   setComment,
   error,
-  onDelete,
   fetchData,
 }) => {
   const { isAuthenticated, token } = UseAuthManager();
   const [users, setUsers] = useState({});
-  const [replyTo, setReplyTo] = useState(null);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [showDropdown, setShowDropdown] = useState(null);
@@ -51,6 +43,8 @@ const Comment = ({
         getUserById(userId)
       );
 
+      console.log(data);
+
       const fetchedUsers = await Promise.all(userPromises);
 
       const usersObject = fetchedUsers.reduce((acc, user) => {
@@ -67,11 +61,6 @@ const Comment = ({
   useEffect(() => {
     fetchUsers();
   }, []);
-
-  const handleReply = (commentId) => {
-    setReplyTo(replyTo === commentId ? null : commentId);
-    setShowDropdown(null);
-  };
 
   const handleEdit = (commentId, content) => {
     setEditingCommentId(commentId);
@@ -120,6 +109,7 @@ const Comment = ({
   };
 
   const handleDeleteComment = async (commentId) => {
+    setLoadingPage(true);
     try {
       const response = await deleteComment(token, commentId);
 
@@ -239,14 +229,6 @@ const Comment = ({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {isAuthenticated && (
-                  <button
-                    onClick={() => handleReply(comment.id)}
-                    className="p-1 hover:bg-gray-200 rounded-full"
-                  >
-                    <Reply size={16} />
-                  </button>
-                )}
                 <CommentActions comment={comment} />
               </div>
             </div>
@@ -279,27 +261,6 @@ const Comment = ({
               </div>
             ) : (
               <p className="text-gray-700">{comment.content}</p>
-            )}
-
-            {replyTo === comment.id && (
-              <div className="mt-4">
-                <textarea
-                  placeholder="Write a reply..."
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                  rows={2}
-                />
-                <div className="flex gap-2 mt-2">
-                  <button className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                    Reply
-                  </button>
-                  <button
-                    onClick={() => setReplyTo(null)}
-                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
             )}
           </div>
         ))}
